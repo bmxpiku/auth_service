@@ -1,9 +1,16 @@
-import { afterAll, describe, expect, it } from "vitest";
-
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type { FastifyInstance } from "fastify";
 import { createApp } from "../src/app.js";
+import { loadConfig } from "../src/config/configLoader.js";
 
 describe("GET /healthcheck", () => {
-  const app = createApp();
+  let app: FastifyInstance;
+
+  beforeAll(() => {
+    // loadConfig() must run before createApp() — getConfig() throws if not initialized
+    loadConfig();
+    app = createApp();
+  });
 
   afterAll(async () => {
     await app.close();
