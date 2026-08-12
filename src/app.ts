@@ -1,13 +1,18 @@
 import fastify, { type FastifyInstance } from "fastify";
+import { errorHandler } from "./errors/errorHandler.js";
+import { buildLoggerConfig } from "./config/loggerConfig.js";
+import { getConfig } from "./config/configLoader.js";
+import { healthRoutes } from "./routes/health.js";
 
 export function createApp(): FastifyInstance {
+  const config = getConfig();
   const app = fastify({
-    logger: process.env.NODE_ENV !== "test",
+    logger: config.NODE_ENV !== "test" ? buildLoggerConfig(config) : false,
   });
 
-  app.get("/healthcheck", async (_request, reply) => {
-    return reply.type("text/plain").send("OK");
-  });
+  app.setErrorHandler(errorHandler);
+
+  app.register(healthRoutes);
 
   return app;
 }
