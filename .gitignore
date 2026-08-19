@@ -1,10 +1,40 @@
+# Dependencies
 node_modules/
-dist/
-coverage/
-.env
-.DS_Store
-npm-debug.log*
-/.idea/
-/AGENTS.md
 
-/src/generated/prisma
+# Build output
+dist/
+
+# Test coverage
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Prisma generated client
+/src/generated/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+/.idea/
+/.vscode/
+
+# Docker override (local overrides only)
+docker-compose.override.yml
+
+# Tooling / agents
+/AGENTS.md
+/.agents/
+/.claude/
+/.windsurf/
+skills-lock.json
