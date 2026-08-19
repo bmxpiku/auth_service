@@ -1,7 +1,21 @@
 import type { FastifyInstance } from "fastify";
 
-export async function healthRoutes(app: FastifyInstance): Promise<void> {
-    app.get("/healthcheck", async (_request, reply) => {
-        return reply.type("text/plain").send("OK");
+
+const healthSchema = {
+    response: {
+         200: {
+             type: "object",
+             properties: {
+                    status: { type: "string" },
+             },
+                required: ["status"]
+         }
+     }
+} as const;
+
+
+export default async function healthRoutes(app: FastifyInstance): Promise<void> {
+    app.get("/healthcheck", { schema: healthSchema },  async (_request, reply) => {
+        return reply.send({status: "ok"});
     });
 }
