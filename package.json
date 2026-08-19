@@ -26,9 +26,11 @@
   },
   "dependencies": {
     "@fastify/autoload": "^6.5.0",
+    "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
+    "pg": "^8.23.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -36,6 +38,7 @@
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^24.13.3",
+    "@types/pg": "^8.23.1",
     "dotenv": "^17.4.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",

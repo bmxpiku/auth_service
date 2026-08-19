@@ -23,7 +23,7 @@ describe("GET /healthcheck", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.headers["content-type"]).toContain("text/plain");
-    expect(response.body).toBe("OK");
+    expect(response.headers["content-type"]).toContain("application/json");
+    expect(response.json()).toEqual({ status: "ok" });
   });
 });
