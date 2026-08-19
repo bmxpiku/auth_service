@@ -1,12 +1,10 @@
-import fastify, { type FastifyInstance } from "fastify";
-import { errorHandler } from "./errors/errorHandler.js";
-import { buildLoggerConfig } from "./config/loggerConfig.js";
-import { getConfig } from "./config/configLoader.js";
-import autoload from "@fastify/autoload";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { join, dirname } from "node:path";
-
-
+import autoload from "@fastify/autoload";
+import fastify, { type FastifyInstance } from "fastify";
+import { getConfig } from "./config/configLoader.js";
+import { buildLoggerConfig } from "./config/loggerConfig.js";
+import { errorHandler } from "./errors/errorHandler.js";
 
 export function createApp(): FastifyInstance {
   const config = getConfig();
@@ -21,7 +19,7 @@ export function createApp(): FastifyInstance {
   app.setErrorHandler(errorHandler);
 
   app.register(autoload, {
-    dir: join(__dirname, "routes")
+    dir: join(__dirname, "routes"),
   });
 
   return app;
