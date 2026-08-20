@@ -8,16 +8,18 @@
     "build": "tsc -p tsconfig.json",
     "check": "biome check",
     "check:fix": "biome check --write",
+    "db:down": "docker compose down",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:up": "docker compose up -d",
     "dev": "tsx watch src/server.ts",
     "format": "biome format --write",
     "postinstall": "prisma generate",
     "prepare": "husky",
     "start": "node dist/server.js",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS='--import tsx' vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "lint-staged": {
@@ -28,6 +30,7 @@
     "@fastify/autoload": "^6.5.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "argon2": "^0.45.1",
     "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
     "pg": "^8.23.0",
@@ -50,5 +53,8 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "allowScripts": {
+    "argon2@0.45.1": true
   }
 }
