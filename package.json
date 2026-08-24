@@ -4,24 +4,57 @@
   "private": true,
   "description": "Minimal Fastify and TypeScript starter for a mentoring program",
   "type": "module",
-  "engines": {
-    "node": ">=24"
-  },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
+    "check": "biome check",
+    "check:fix": "biome check --write",
+    "db:down": "docker compose down",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:up": "docker compose up -d",
+    "dev": "tsx watch src/server.ts",
+    "format": "biome format --write",
+    "postinstall": "prisma generate",
+    "prepare": "husky",
     "start": "node dist/server.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "NODE_OPTIONS='--import tsx' vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "lint-staged": {
+    "package.json": "sort-package-json",
+    "**/*.ts": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
+    "@fastify/autoload": "^6.5.0",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "argon2": "^0.45.1",
+    "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
+    "pg": "^8.23.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^24.13.3",
+    "@types/pg": "^8.23.1",
+    "dotenv": "^17.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prisma": "^7.9.1",
+    "sort-package-json": "^4.0.0",
     "tsx": "^4.23.7",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "allowScripts": {
+    "argon2@0.45.1": true
   }
 }

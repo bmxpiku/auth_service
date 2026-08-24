@@ -1,7 +1,7 @@
-import {AppError} from "../AppError.js";
+import { AppError } from "../AppError.js";
 
 export class UnauthorizedError extends AppError {
-    constructor(message = "Unauthorized") {
-        super(message, 401, "UNAUTHORIZED");
-    }
+  constructor(message = "Unauthorized") {
+    super(message, 401, "UNAUTHORIZED");
+  }
 }
