@@ -12,3 +12,10 @@ export function getDb(): PrismaClient {
   }
   return _db;
 }
+
+export function closeDb(): void {
+  if (_db) {
+    _db.$disconnect();
+    _db = null;
+  }
+}

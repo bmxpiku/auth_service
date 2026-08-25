@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app";
 import { loadConfig } from "../../src/config/configLoader";
-import { getDb } from "../../src/lib/db.js";
 import { resetTestDatabase } from "../clearDb";
 
 describe("POST /users", () => {

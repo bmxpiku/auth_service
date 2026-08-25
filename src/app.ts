@@ -7,6 +7,7 @@ import fastify, { type FastifyInstance } from "fastify";
 import { getConfig } from "./config/configLoader.js";
 import { buildLoggerConfig } from "./config/loggerConfig.js";
 import { errorHandler } from "./errors/errorHandler.js";
+import { closeDb } from "./lib/db.js";
 
 export function createApp(): FastifyInstance {
   const config = getConfig();
@@ -25,6 +26,10 @@ export function createApp(): FastifyInstance {
 
   app.register(autoload, {
     dir: join(__dirname, "routes"),
+  });
+
+  app.addHook("onClose", async () => {
+    closeDb();
   });
 
   return app;
