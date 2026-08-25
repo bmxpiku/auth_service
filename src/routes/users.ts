@@ -5,14 +5,17 @@ import { normalizeEmail } from "../lib/email.js";
 import { withPrismaError } from "../lib/prismaErrors.js";
 import {
   type CreateUserBody,
+  type CreateUserReply201,
   createUserBodySchema,
   createUserReply201Schema,
+  type ErrorReply,
   errorReplySchema,
 } from "../schemas/users.js";
 
 export default async function usersRoutes(app: FastifyInstance): Promise<void> {
   app.post<{
     Body: CreateUserBody;
+    Reply: { 201: CreateUserReply201; 400: ErrorReply };
   }>(
     "/users",
     {
@@ -39,7 +42,7 @@ export default async function usersRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(201).send({
         id: user.id,
         email: user.email,
-        createdAt: user.createdAt,
+        createdAt: user.createdAt.toISOString(),
       });
     },
   );

@@ -21,15 +21,20 @@ export type CreateUserBody = FromSchema<typeof createUserBodySchema>;
 
 export const createUserReply201Schema = {
   type: "object",
+  additionalProperties: false,
+  required: ["id", "email", "createdAt"],
   properties: {
     id: { type: "string" },
     email: { type: "string" },
     createdAt: { type: "string" },
   },
-} as const;
+} as const satisfies JSONSchema;
+
+export type CreateUserReply201 = FromSchema<typeof createUserReply201Schema>;
 
 export const errorReplySchema = {
   type: "object",
+  additionalProperties: false,
   properties: {
     error: { type: "string" },
     message: { type: "string" },
@@ -38,4 +43,6 @@ export const errorReplySchema = {
       items: { type: "object" },
     },
   },
-} as const;
+} as const satisfies JSONSchema;
+
+export type ErrorReply = FromSchema<typeof errorReplySchema>;
