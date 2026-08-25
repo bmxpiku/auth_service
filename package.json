@@ -21,8 +21,10 @@
     "format": "biome format --write",
     "postinstall": "prisma generate",
     "prepare": "husky",
+    "qc": "npm run check && npm run typecheck && npm test && npm run test:db",
     "start": "node dist/server.js",
     "test": "NODE_OPTIONS='--import tsx' vitest run",
+    "test:db": "NODE_OPTIONS='--import tsx' vitest run --config vitest.db.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "lint-staged": {
@@ -33,9 +35,11 @@
     "@fastify/autoload": "^6.5.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "ajv-formats": "^3.0.1",
     "argon2": "^0.45.1",
     "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
+    "json-schema-to-ts": "^3.1.1",
     "pg": "^8.23.0",
     "zod": "^4.4.3"
   },

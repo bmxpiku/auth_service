@@ -1,6 +1,8 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import autoload from "@fastify/autoload";
+import type { Plugin } from "ajv";
+import ajvFormats from "ajv-formats";
 import fastify, { type FastifyInstance } from "fastify";
 import { getConfig } from "./config/configLoader.js";
 import { buildLoggerConfig } from "./config/loggerConfig.js";
@@ -14,6 +16,9 @@ export function createApp(): FastifyInstance {
 
   const app = fastify({
     logger: config.NODE_ENV !== "test" ? buildLoggerConfig(config) : false,
+    ajv: {
+      plugins: [ajvFormats.default as Plugin<unknown>],
+    },
   });
 
   app.setErrorHandler(errorHandler);
