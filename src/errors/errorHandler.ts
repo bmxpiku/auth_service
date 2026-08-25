@@ -12,6 +12,10 @@ export function errorHandler(error: FastifyError | Error, request: FastifyReques
   }
 
   if (error instanceof AppError) {
+    if (error.cause) {
+      request.log.error({ err: error.cause, code: error.code }, error.message);
+    }
+
     reply.status(error.statusCode).send({
       error: error.code,
       message: error.message,
