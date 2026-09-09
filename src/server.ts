@@ -6,7 +6,7 @@ async function start() {
   const config = loadConfig();
   const app = createApp();
 
-  closeWithGrace({ delay: 10_000 }, async ({ err, signal }) => {
+  const closeListeners = closeWithGrace({ delay: 10_000 }, async ({ err, signal }) => {
     if (err) {
       app.log.error({ err, signal }, "Shutdown triggered by error");
     } else {
@@ -14,6 +14,10 @@ async function start() {
     }
 
     await app.close();
+  });
+
+  app.addHook("onClose", async () => {
+    closeListeners.uninstall();
   });
 
   try {

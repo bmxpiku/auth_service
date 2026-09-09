@@ -33,10 +33,12 @@ export default async function usersRoutes(app: FastifyInstance): Promise<void> {
       const email = normalizeEmail(rawEmail);
       const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
 
-      const user = await withPrismaError(() =>
-        getDb().user.create({
-          data: { email, passwordHash },
-        }),
+      const user = await withPrismaError(
+        () =>
+          getDb().user.create({
+            data: { email, passwordHash },
+          }),
+        { operation: "create", model: "User" },
       );
 
       return reply.status(201).send({
