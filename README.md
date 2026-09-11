@@ -30,3 +30,9 @@ The service listens on `http://localhost:3000` by default.
 - `npm run typecheck` - check TypeScript types
 - `npm run build` - compile the service to `dist/`
 - `npm start` - run the compiled service (run `npm run build` first)
+
+## Docs
+
+- [`docs/prisma-error-handling.md`](docs/prisma-error-handling.md) - Prisma error handling flow
+- [`docs/jwt-manual.md`](docs/jwt-manual.md) - JWT/JWS/JWE theory, HS256 vs RS256, claims, best practices, and `jose` usage notes
+- [`docs/jwt-cheatsheet.html`](docs/jwt-cheatsheet.html) - one-page printable (monochrome, A4) JWT cheat sheet

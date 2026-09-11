@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>JWT Cheat Sheet</title>
+<style>
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    color: #000;
+    background: #fff;
+    font-size: 9.5px;
+    line-height: 1.25;
+  }
+
+  .sheet {
+    width: 190mm;
+    margin: 0 auto;
+    padding: 4mm;
+  }
+
+  h1 {
+    font-size: 15px;
+    margin: 0 0 2px 0;
+    border-bottom: 2px solid #000;
+    padding-bottom: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    font-size: 8px;
+    color: #333;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 0 0 3px 0;
+    padding: 2px 4px;
+    background: #000;
+    color: #fff;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+  }
+
+  section {
+    margin-bottom: 6px;
+    break-inside: avoid;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 4px;
+  }
+
+  th, td {
+    border: 1px solid #666;
+    padding: 2px 4px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #e6e6e6;
+    font-weight: 600;
+  }
+
+  code, .mono {
+    font-family: "Courier New", monospace;
+    font-size: 8.5px;
+  }
+
+  .token-diagram {
+    font-family: "Courier New", monospace;
+    font-size: 8px;
+    border: 1px dashed #666;
+    padding: 4px;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+
+  .header-seg { text-decoration: underline; }
+  .payload-seg { font-weight: bold; }
+  .sig-seg { font-style: italic; }
+
+  ul {
+    margin: 2px 0 4px 14px;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 1px;
+  }
+
+  .good::before { content: "✓ "; font-weight: bold; }
+  .bad::before { content: "✗ "; font-weight: bold; }
+
+  .good, .bad {
+    padding: 1px 3px;
+    margin-bottom: 2px;
+    border: 1px solid #999;
+  }
+
+  .good { background: #f2f2f2; }
+  .bad { background: #d9d9d9; }
+
+  .footer-note {
+    font-size: 7.5px;
+    color: #444;
+    text-align: right;
+    margin-top: 4px;
+    border-top: 1px solid #999;
+    padding-top: 2px;
+  }
+
+  @media print {
+    body { font-size: 9.5px; }
+    .sheet { width: auto; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <h1>JWT Cheat Sheet</h1>
+  <div class="subtitle">
+    JWT = container spec &middot; JWS = signed (readable, tamper-evident) &middot; JWE = encrypted (confidential)
+    &mdash; a signed JWT is <strong>NOT</strong> encrypted.
+  </div>
+
+  <div class="token-diagram">
+    <span class="header-seg">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span class="payload-seg">eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzM2NDAwMDAwfQ</span>.<span class="sig-seg">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    <br />
+    <span class="header-seg">HEADER</span> (alg, typ, kid) . <span class="payload-seg">PAYLOAD</span> (claims) . <span class="sig-seg">SIGNATURE</span> (integrity + authenticity)
+  </div>
+
+  <div class="cols">
+    <div>
+
+      <section>
+        <h2>AuthN vs AuthZ</h2>
+        <table>
+          <tr><th>Term</th><th>Question</th></tr>
+          <tr><td>Authentication</td><td>Who are you?</td></tr>
+          <tr><td>Authorization</td><td>What can you do?</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Registered Claims (RFC 7519)</h2>
+        <table>
+          <tr><th>Claim</th><th>Meaning</th></tr>
+          <tr><td class="mono">iss</td><td>Issuer &mdash; who created the token</td></tr>
+          <tr><td class="mono">sub</td><td>Subject &mdash; user/entity ID</td></tr>
+          <tr><td class="mono">aud</td><td>Audience &mdash; intended recipient service</td></tr>
+          <tr><td class="mono">iat</td><td>Issued-at timestamp</td></tr>
+          <tr><td class="mono">nbf</td><td>Not-before timestamp</td></tr>
+          <tr><td class="mono">exp</td><td>Expiration timestamp (always set!)</td></tr>
+          <tr><td class="mono">jti</td><td>Unique token ID (revocation/replay)</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>HS256 vs RS256</h2>
+        <table>
+          <tr><th></th><th>HS256</th><th>RS256</th></tr>
+          <tr><td>Key</td><td>1 shared secret</td><td>private/public pair</td></tr>
+          <tr><td>Signs</td><td>anyone w/ secret</td><td>only private key holder</td></tr>
+          <tr><td>Verifies</td><td>anyone w/ secret</td><td>anyone w/ public key</td></tr>
+          <tr><td>Use case</td><td>single issuer = verifier</td><td>multiple verifying services</td></tr>
+        </table>
+      </section>
+
+    </div>
+    <div>
+
+      <section>
+        <h2>Key Roles (Asymmetric)</h2>
+        <table>
+          <tr><th>Key</th><th>Used for</th><th>Held by</th></tr>
+          <tr><td>Private</td><td>Signing</td><td>Issuer only</td></tr>
+          <tr><td>Public</td><td>Verifying</td><td>Anyone / JWKS endpoint</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Good Practices</h2>
+        <div class="good">Verify exp, nbf, iss, aud &mdash; not just signature</div>
+        <div class="good">Short-lived access token + refresh token</div>
+        <div class="good">Minimal payload (sub, role) &mdash; no secrets</div>
+        <div class="good">Pin allowed algorithms on verify</div>
+        <div class="good">RS256/JWKS when multiple services verify</div>
+        <div class="good">httpOnly + Secure + SameSite cookies</div>
+        <div class="good">Rotate keys via kid; support jti revocation</div>
+      </section>
+
+      <section>
+        <h2>Bad Practices</h2>
+        <div class="bad">Accepting alg:none or unpinned alg (confusion attack)</div>
+        <div class="bad">Secrets/PII stored in JWT payload</div>
+        <div class="bad">No expiration / no refresh flow</div>
+        <div class="bad">Trusting token without calling verify()</div>
+        <div class="bad">Sharing one HMAC secret across untrusted services</div>
+        <div class="bad">Ignoring aud (confused deputy risk)</div>
+      </section>
+
+    </div>
+  </div>
+
+  <section>
+    <h2>Decision Rule</h2>
+    <ul>
+      <li><strong>HS256</strong>: same service issues &amp; verifies (monolith / this auth service internally).</li>
+      <li><strong>RS256</strong>: other services/gateways must verify without being trusted to issue &mdash; private key never leaves the issuer.</li>
+    </ul>
+  </section>
+
+  <div class="footer-note">JWT / JWS / JWE reference &mdash; auth_service internal docs</div>
+
+</div>
+</body>
+</html>
+
