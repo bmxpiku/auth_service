@@ -2,161 +2,295 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JWT Cheat Sheet</title>
 <style>
-  @page {
-    size: A4;
-    margin: 10mm;
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-border: #2a2f3a;
+    --text: #e6e8ec;
+    --muted: #9aa3af;
+    --accent: #5eb1ff;
+    --accent2: #8ee6b8;
+    --warn: #ffb454;
+    --code-bg: #10131a;
+    --shadow: rgba(0, 0, 0, 0.35);
+    --good-bg: #16241b;
+    --bad-bg: #241616;
+    --mono: "Courier New", Consolas, monospace;
   }
-
-  * {
-    box-sizing: border-box;
+  :root[data-theme="light"] {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --panel-border: #d7dce3;
+    --text: #1b1f27;
+    --muted: #5b6472;
+    --accent: #1266d1;
+    --accent2: #157a4a;
+    --warn: #a8590a;
+    --code-bg: #eef1f5;
+    --shadow: rgba(20, 30, 50, 0.1);
+    --good-bg: #eaf6ee;
+    --bad-bg: #fbeaea;
   }
-
+  * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    transition: background-color .2s, color .2s;
   }
-
   body {
     font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-    color: #000;
-    background: #fff;
-    font-size: 9.5px;
-    line-height: 1.25;
+    font-size: 14px;
+    line-height: 1.45;
   }
-
   .sheet {
-    width: 190mm;
+    max-width: 980px;
     margin: 0 auto;
-    padding: 4mm;
+    padding: 20px 20px 50px;
   }
-
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 0;
+    background: linear-gradient(var(--bg) 70%, transparent);
+    margin-bottom: 10px;
+  }
+  .toolbar button {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .toolbar button:hover { border-color: var(--accent); }
   h1 {
-    font-size: 15px;
-    margin: 0 0 2px 0;
-    border-bottom: 2px solid #000;
-    padding-bottom: 3px;
-    letter-spacing: 0.5px;
+    font-size: 24px;
+    margin: 0 0 6px 0;
+    border-bottom: 2px solid var(--panel-border);
+    padding-bottom: 8px;
+    letter-spacing: 0.3px;
+    color: var(--text);
   }
-
   .subtitle {
-    font-size: 8px;
-    color: #333;
-    margin-bottom: 6px;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 14px;
   }
-
   h2 {
-    font-size: 9.5px;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin: 0 0 3px 0;
-    padding: 2px 4px;
-    background: #000;
-    color: #fff;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+    padding: 4px 8px;
+    background: var(--accent);
+    color: #05131f;
+    border-radius: 5px;
+    display: inline-block;
   }
-
   .cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 5mm;
+    gap: 14px;
   }
-
   section {
-    margin-bottom: 6px;
+    margin-bottom: 14px;
     break-inside: avoid;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 12px 14px;
   }
-
   table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 4px;
+    font-size: 12.5px;
   }
-
   th, td {
-    border: 1px solid #666;
-    padding: 2px 4px;
+    border: 1px solid var(--panel-border);
+    padding: 4px 6px;
     text-align: left;
     vertical-align: top;
   }
-
   th {
-    background: #e6e6e6;
+    background: var(--code-bg);
     font-weight: 600;
+    color: var(--muted);
   }
-
   code, .mono {
-    font-family: "Courier New", monospace;
-    font-size: 8.5px;
+    font-family: var(--mono), monospace;
+    font-size: 12px;
+    background: var(--code-bg);
+    color: var(--accent2);
+    padding: 1px 4px;
+    border-radius: 3px;
   }
-
   .token-diagram {
-    font-family: "Courier New", monospace;
-    font-size: 8px;
-    border: 1px dashed #666;
-    padding: 4px;
-    margin-bottom: 4px;
+    font-family: var(--mono), monospace;
+    font-size: 12px;
+    background: var(--panel);
+    border: 1px dashed var(--panel-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
     word-break: break-all;
   }
-
-  .header-seg { text-decoration: underline; }
-  .payload-seg { font-weight: bold; }
-  .sig-seg { font-style: italic; }
-
+  .header-seg { text-decoration: underline; color: var(--accent); }
+  .payload-seg { font-weight: bold; color: var(--accent2); }
+  .sig-seg { font-style: italic; color: var(--warn); }
   ul {
-    margin: 2px 0 4px 14px;
+    margin: 4px 0 4px 16px;
     padding: 0;
   }
-
   li {
-    margin-bottom: 1px;
+    margin-bottom: 3px;
   }
-
   .good::before { content: "✓ "; font-weight: bold; }
   .bad::before { content: "✗ "; font-weight: bold; }
-
   .good, .bad {
-    padding: 1px 3px;
-    margin-bottom: 2px;
-    border: 1px solid #999;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    font-size: 12.5px;
   }
-
-  .good { background: #f2f2f2; }
-  .bad { background: #d9d9d9; }
-
+  .good { background: var(--good-bg); border: 1px solid var(--accent2); }
+  .bad { background: var(--bad-bg); border: 1px solid var(--warn); }
   .footer-note {
-    font-size: 7.5px;
-    color: #444;
+    font-size: 11px;
+    color: var(--muted);
     text-align: right;
-    margin-top: 4px;
-    border-top: 1px solid #999;
-    padding-top: 2px;
+    margin-top: 10px;
+    border-top: 1px solid var(--panel-border);
+    padding-top: 6px;
   }
-
+  @media (max-width: 700px) {
+    .cols { grid-template-columns: 1fr; }
+  }
+  /* ---------------------------------------------------------------- */
+  /* Print — optimized for A4, both portrait and landscape            */
+  /* ---------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  /* Named page for landscape printing (Chrome/Edge support CSS named
+     pages via the `page` property; other browsers gracefully fall back
+     to the default @page size above). Toggled by body.print-landscape. */
+  @page landscape-a4 {
+    size: A4 landscape;
+    margin: 8mm;
+  }
   @media print {
-    body { font-size: 9.5px; }
-    .sheet { width: auto; padding: 0; }
+    .no-print { display: none !important; }
+    html, body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-size: 9.5px;
+      line-height: 1.25;
+    }
+    .sheet {
+      max-width: none;
+      width: auto;
+      padding: 0;
+    }
+    body.print-landscape .sheet {
+      page: landscape-a4;
+    }
+    h1 {
+      font-size: 15px;
+      color: #000 !important;
+      border-bottom: 2px solid #000 !important;
+      padding-bottom: 3px;
+    }
+    .subtitle { color: #333 !important; font-size: 8px; }
+    h2 {
+      background: #000 !important;
+      color: #fff !important;
+      font-size: 9.5px;
+      border-radius: 0;
+    }
+    .cols {
+      grid-template-columns: 1fr 1fr;
+      gap: 5mm;
+    }
+    body.print-landscape .cols {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    section {
+      background: #fff !important;
+      border: 1px solid #999 !important;
+      border-radius: 0;
+      padding: 4px 6px;
+      margin-bottom: 6px;
+      break-inside: avoid;
+    }
+    table { font-size: 8.5px; }
+    th, td { border: 1px solid #666 !important; padding: 2px 4px; }
+    th { background: #e6e6e6 !important; color: #000 !important; }
+    code, .mono {
+      background: transparent !important;
+      color: #000 !important;
+      font-size: 8.5px;
+      border: none;
+      padding: 0;
+    }
+    .token-diagram {
+      background: #fff !important;
+      border: 1px dashed #666 !important;
+      font-size: 8px;
+    }
+    .header-seg, .payload-seg, .sig-seg { color: #000 !important; }
+    .good, .bad {
+      border: 1px solid #999 !important;
+      border-radius: 0;
+    }
+    .good { background: #f2f2f2 !important; }
+    .bad { background: #d9d9d9 !important; }
+    .footer-note {
+      color: #444 !important;
+      border-top: 1px solid #999 !important;
+      font-size: 7.5px;
+    }
   }
 </style>
 </head>
 <body>
 <div class="sheet">
-
+  <div class="toolbar no-print">
+    <button type="button" id="theme-toggle" title="Toggle light/dark theme">
+      <span id="theme-icon" aria-hidden="true">🌙</span>
+      <span id="theme-label">Dark</span>
+    </button>
+    <button type="button" id="print-portrait" title="Print in portrait orientation (A4)">🖨️ Portrait (A4)</button>
+    <button type="button" id="print-landscape" title="Print in landscape orientation (A4)">🖨️ Landscape (A4)</button>
+  </div>
   <h1>JWT Cheat Sheet</h1>
   <div class="subtitle">
     JWT = container spec &middot; JWS = signed (readable, tamper-evident) &middot; JWE = encrypted (confidential)
     &mdash; a signed JWT is <strong>NOT</strong> encrypted.
   </div>
-
   <div class="token-diagram">
     <span class="header-seg">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span class="payload-seg">eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzM2NDAwMDAwfQ</span>.<span class="sig-seg">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
     <br />
     <span class="header-seg">HEADER</span> (alg, typ, kid) . <span class="payload-seg">PAYLOAD</span> (claims) . <span class="sig-seg">SIGNATURE</span> (integrity + authenticity)
   </div>
-
   <div class="cols">
     <div>
-
       <section>
         <h2>AuthN vs AuthZ</h2>
         <table>
@@ -165,7 +299,6 @@
           <tr><td>Authorization</td><td>What can you do?</td></tr>
         </table>
       </section>
-
       <section>
         <h2>Registered Claims (RFC 7519)</h2>
         <table>
@@ -179,7 +312,6 @@
           <tr><td class="mono">jti</td><td>Unique token ID (revocation/replay)</td></tr>
         </table>
       </section>
-
       <section>
         <h2>HS256 vs RS256</h2>
         <table>
@@ -190,10 +322,8 @@
           <tr><td>Use case</td><td>single issuer = verifier</td><td>multiple verifying services</td></tr>
         </table>
       </section>
-
     </div>
     <div>
-
       <section>
         <h2>Key Roles (Asymmetric)</h2>
         <table>
@@ -202,7 +332,6 @@
           <tr><td>Public</td><td>Verifying</td><td>Anyone / JWKS endpoint</td></tr>
         </table>
       </section>
-
       <section>
         <h2>Good Practices</h2>
         <div class="good">Verify exp, nbf, iss, aud &mdash; not just signature</div>
@@ -213,7 +342,6 @@
         <div class="good">httpOnly + Secure + SameSite cookies</div>
         <div class="good">Rotate keys via kid; support jti revocation</div>
       </section>
-
       <section>
         <h2>Bad Practices</h2>
         <div class="bad">Accepting alg:none or unpinned alg (confusion attack)</div>
@@ -223,10 +351,8 @@
         <div class="bad">Sharing one HMAC secret across untrusted services</div>
         <div class="bad">Ignoring aud (confused deputy risk)</div>
       </section>
-
     </div>
   </div>
-
   <section>
     <h2>Decision Rule</h2>
     <ul>
@@ -234,10 +360,60 @@
       <li><strong>RS256</strong>: other services/gateways must verify without being trusted to issue &mdash; private key never leaves the issuer.</li>
     </ul>
   </section>
-
   <div class="footer-note">JWT / JWS / JWE reference &mdash; auth_service internal docs</div>
-
 </div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggleBtn = document.getElementById("theme-toggle");
+    var icon = document.getElementById("theme-icon");
+    var label = document.getElementById("theme-label");
+    var STORAGE_KEY = "auth-service-jwt-cheatsheet-theme";
+    function applyTheme(theme) {
+      if (theme === "light") {
+        root.setAttribute("data-theme", "light");
+        icon.textContent = "☀️";
+        label.textContent = "Light";
+      } else {
+        root.setAttribute("data-theme", "dark");
+        icon.textContent = "🌙";
+        label.textContent = "Dark";
+      }
+    }
+    var preferredLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    var stored = null;
+    try {
+      stored = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      /* localStorage unavailable (e.g. file:// in some browsers) — ignore */
+    }
+    applyTheme(stored || (preferredLight ? "light" : "dark"));
+    toggleBtn.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      applyTheme(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch (e) {
+        /* ignore persistence errors */
+      }
+    });
+    function printAs(orientation) {
+      document.body.classList.remove("print-landscape");
+      if (orientation === "landscape") {
+        document.body.classList.add("print-landscape");
+      }
+      window.print();
+    }
+    document.getElementById("print-portrait").addEventListener("click", function () {
+      printAs("portrait");
+    });
+    document.getElementById("print-landscape").addEventListener("click", function () {
+      printAs("landscape");
+    });
+    window.addEventListener("afterprint", function () {
+      document.body.classList.remove("print-landscape");
+    });
+  })();
+</script>
 </body>
 </html>
-
