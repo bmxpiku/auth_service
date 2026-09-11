@@ -1,5 +1,5 @@
 services:
-  db:
+  db-dev:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
@@ -9,12 +9,28 @@ services:
     ports:
         - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+  db-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
+  postgres_test_data:
