@@ -4,7 +4,7 @@ import { loadConfig } from "./config/configLoader.js";
 
 async function start() {
   const config = loadConfig();
-  const app = createApp();
+  const app = createApp(config);
 
   const closeListeners = closeWithGrace({ delay: 10_000 }, async ({ err, signal }) => {
     if (err) {

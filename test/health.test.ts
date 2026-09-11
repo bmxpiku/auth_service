@@ -7,9 +7,8 @@ describe("GET /healthcheck", () => {
   let app: FastifyInstance;
 
   beforeAll(() => {
-    // loadConfig() must run before createApp() — getConfig() throws if not initialized
-    loadConfig();
-    app = createApp();
+    const config = loadConfig();
+    app = createApp(config);
   });
 
   afterAll(async () => {
