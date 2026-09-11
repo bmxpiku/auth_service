@@ -3,15 +3,14 @@ import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { loadConfig } from "../../src/config/configLoader.js";
-import { getDb } from "../../src/lib/db.js";
 import { resetTestDatabase } from "../clearDb.js";
 
 describe("POST /users", () => {
   let app: FastifyInstance;
 
   beforeAll(() => {
-    loadConfig();
-    app = createApp();
+    const config = loadConfig();
+    app = createApp(config);
   });
 
   afterAll(async () => {
@@ -19,7 +18,7 @@ describe("POST /users", () => {
   });
 
   beforeEach(async () => {
-    await resetTestDatabase();
+    await resetTestDatabase(app);
   });
 
   it("creates a user", async () => {
@@ -51,7 +50,7 @@ describe("POST /users", () => {
     const response = await app.inject({ method: "POST", url: "/users", body: payload });
     const { id } = response.json();
 
-    const user = await getDb().user.findUniqueOrThrow({ where: { id } });
+    const user = await app.db.user.findUniqueOrThrow({ where: { id } });
 
     expect(user.passwordHash).not.toBe(payload.password);
     await expect(argon2.verify(user.passwordHash, payload.password)).resolves.toBe(true);

@@ -1,6 +1,5 @@
 import argon2 from "argon2";
 import type { FastifyInstance } from "fastify";
-import { getDb } from "../lib/db.js";
 import { normalizeEmail } from "../lib/email.js";
 import { withPrismaError } from "../lib/prismaErrors.js";
 import {
@@ -35,7 +34,7 @@ export default async function usersRoutes(app: FastifyInstance): Promise<void> {
 
       const user = await withPrismaError(
         () =>
-          getDb().user.create({
+          app.db.user.create({
             data: { email, passwordHash },
           }),
         { operation: "create", model: "User" },

@@ -32,7 +32,6 @@
     "**/*.ts": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
-    "@fastify/autoload": "^6.5.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "ajv-formats": "^3.0.1",
