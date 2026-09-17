@@ -1,8 +1,8 @@
-import argon2 from "argon2";
 import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { loadConfig } from "../../src/config/configLoader.js";
+import { verifyPassword } from "../../src/lib/password";
 import { resetTestDatabase } from "../clearDb.js";
 
 describe("POST /users", () => {
@@ -53,7 +53,7 @@ describe("POST /users", () => {
     const user = await app.db.user.findUniqueOrThrow({ where: { id } });
 
     expect(user.passwordHash).not.toBe(payload.password);
-    await expect(argon2.verify(user.passwordHash, payload.password)).resolves.toBe(true);
+    await expect(verifyPassword(user.passwordHash, payload.password)).resolves.toBe(true);
   });
 
   it("does not allow two users with the same email", async () => {

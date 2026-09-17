@@ -1,7 +1,4 @@
-import argon2 from "argon2";
 import type { FastifyInstance } from "fastify";
-import { normalizeEmail } from "../lib/email.js";
-import { withPrismaError } from "../lib/prismaErrors.js";
 import {
   type CreateUserBody,
   type CreateUserReply201,
@@ -10,6 +7,7 @@ import {
   type ErrorReply,
   errorReplySchema,
 } from "../schemas/users.js";
+import { createUser } from "../services/users.service.js";
 
 export default async function usersRoutes(app: FastifyInstance): Promise<void> {
   app.post<{
@@ -27,18 +25,7 @@ export default async function usersRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const { email: rawEmail, password } = request.body;
-
-      const email = normalizeEmail(rawEmail);
-      const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
-
-      const user = await withPrismaError(
-        () =>
-          app.db.user.create({
-            data: { email, passwordHash },
-          }),
-        { operation: "create", model: "User" },
-      );
+      const user = await createUser(request.body);
 
       return reply.status(201).send({
         id: user.id,

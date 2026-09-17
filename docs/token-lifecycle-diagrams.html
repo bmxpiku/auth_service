@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Token Lifecycle Diagrams (Mermaid)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-2: #f1f3f6;
+    --text: #16181d;
+    --muted: #667085;
+    --border: #e3e6ea;
+    --accent: #4f46e5;
+    --accent-2: #7c3aed;
+    --accent-soft: #eef0ff;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -6px rgba(16, 24, 40, 0.08);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #0d0f14;
+    --surface: #14171e;
+    --surface-2: #1a1e27;
+    --text: #eef0f4;
+    --muted: #9aa2b1;
+    --border: #262b36;
+    --accent: #818cf8;
+    --accent-2: #a78bfa;
+    --accent-soft: #1c1e33;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--accent-soft), transparent),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+  header.doc-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.5rem;
+    margin: 0 -1.5rem 2.5rem;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px) saturate(140%);
+    border-bottom: 1px solid var(--border);
+  }
+  header.doc-header .title-block { display: flex; align-items: center; gap: 0.7rem; }
+  header.doc-header .logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 1rem; flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  header.doc-header h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  header.doc-header p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+  .toolbar { display: flex; gap: 0.5rem; }
+  button.toggle {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  button.toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
+  button.toggle:active { transform: translateY(0); }
+
+  .hero { margin-bottom: 2.5rem; }
+  .hero .eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 0.9rem;
+  }
+  .hero h2.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.6rem;
+    background: linear-gradient(135deg, var(--text), var(--muted));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.lede { color: var(--muted); font-size: 1.02rem; max-width: 66ch; margin: 0; }
+
+  section.diagram {
+    margin-top: 1.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.6rem 1.7rem 1.8rem;
+    background: var(--surface);
+  }
+  section.diagram h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  section.diagram h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 0.8rem; font-weight: 800; flex-shrink: 0;
+  }
+  section.diagram p.desc { color: var(--muted); font-size: 0.9rem; margin: 0.4rem 0 1rem; }
+  .mermaid {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    header.doc-header { flex-wrap: wrap; }
+  }
+
+  @page { size: A4; margin: 16mm 14mm; }
+  @media print {
+    html, html[data-theme="dark"] {
+      --bg: #ffffff; --surface: #ffffff; --surface-2: #ffffff;
+      --text: #000000; --muted: #333333; --border: #000000;
+      --accent: #000000; --accent-2: #000000; --accent-soft: #ffffff;
+      --shadow: none;
+    }
+    body { background: #fff; }
+    header.doc-header { position: static; backdrop-filter: none; }
+    .toolbar { display: none !important; }
+    .hero h2.page-title { -webkit-text-fill-color: #000; background: none; color: #000; }
+    section.diagram { box-shadow: none; border: 1px solid #000; page-break-inside: avoid; }
+    section.diagram h2 { page-break-after: avoid; }
+    .mermaid { border: 1px solid #000; }
+    body { font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="doc-header">
+    <div class="title-block">
+      <div class="logo">A</div>
+      <div>
+        <h1>Token Lifecycle Diagrams</h1>
+        <p>auth_service &middot; companion reference &middot; 2026</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="toggle" id="themeToggle" type="button">&#9788; Toggle theme</button>
+      <button class="toggle" onclick="window.print()" type="button">&#128424; Print / PDF</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Diagrams</span>
+    <h2 class="page-title">Token Lifecycle Diagrams</h2>
+    <p class="lede">Sequence, state, and flow diagrams covering every token-related operation: creation, rotation, reuse detection, revocation, and the end-to-end picture.</p>
+  </div>
+
+  <section class="diagram">
+    <h2><span class="num">1</span>Login &mdash; Token Creation</h2>
+    <p class="desc">A new token family is created: one access token (stateless) and one refresh token (hashed &amp; persisted).</p>
+    <pre class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant DB as Database
+
+    C->>S: POST /auth/login (email, password)
+    S->>DB: findUnique(email)
+    DB-->>S: user or null
+    S->>S: verifyPassword (constant-time, argon2)
+    alt invalid credentials
+        S-->>C: 401 Invalid credentials (generic)
+    else valid credentials
+        S->>S: sign access token (JWT, exp 10m)
+        S->>S: generate refresh token (random) and hash it
+        S->>DB: insert RefreshToken (hash, userId, familyId, expiresAt)
+        DB-->>S: ok
+        S-->>C: 200 OK - accessToken in body, refreshToken cookie (httpOnly, Secure, SameSite=Strict)
+    end
+    </pre>
+  </section>
+
+  <section class="diagram">
+    <h2><span class="num">2</span>Refresh &mdash; Rotation</h2>
+    <p class="desc">Every refresh call retires the old refresh token and mints a brand-new pair in the same family.</p>
+    <pre class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant DB as Database
+
+    C->>S: POST /auth/refresh (cookie: refreshToken)
+    S->>S: hash(incoming refresh token)
+    S->>DB: findUnique(tokenHash)
+    DB-->>S: token row
+    alt not found, expired, or revoked
+        S-->>C: 401 Unauthorized (re-login required)
+    else valid and unused
+        S->>DB: mark row revoked, set replacedByTokenId
+        S->>S: sign new access token
+        S->>S: generate new refresh token and hash it
+        S->>DB: insert new RefreshToken (same familyId)
+        DB-->>S: ok
+        S-->>C: 200 OK - new accessToken in body, new refreshToken cookie
+    end
+    </pre>
+  </section>
+
+  <section class="diagram">
+    <h2><span class="num">3</span>Reuse Detection &mdash; Theft Response</h2>
+    <p class="desc">Presenting a refresh token that was already rotated/used is treated as a compromise signal: the whole family is revoked.</p>
+    <pre class="mermaid">
+sequenceDiagram
+    participant Attacker
+    participant S as Server
+    participant DB as Database
+    participant Victim as Legit User
+
+    Note over Victim,S: Token already rotated once (step 2)
+    Attacker->>S: POST /auth/refresh (stolen, already-used refresh token)
+    S->>DB: findUnique(tokenHash)
+    DB-->>S: token row (revokedAt is not null)
+    S->>S: reuse detected
+    S->>DB: revoke ALL tokens where familyId matches
+    DB-->>S: ok
+    S-->>Attacker: 401 Unauthorized
+    Note over Victim: next refresh also fails, must log in again
+    </pre>
+  </section>
+
+  <section class="diagram">
+    <h2><span class="num">4</span>Logout &mdash; Explicit Revocation</h2>
+    <p class="desc">Logout revokes only the current token and clears the cookie; the rest of the family (other devices) stays valid.</p>
+    <pre class="mermaid">
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant DB as Database
+
+    C->>S: POST /auth/logout (cookie: refreshToken)
+    S->>S: hash(refresh token)
+    S->>DB: update RefreshToken set revokedAt = now()
+    DB-->>S: ok
+    S-->>C: 204 No Content - cookie cleared (Max-Age 0)
+    </pre>
+  </section>
+
+  <section class="diagram">
+    <h2><span class="num">5</span>Token State Machine</h2>
+    <p class="desc">Lifecycle states a single refresh token row can be in.</p>
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Active: created at login or rotation
+    Active --> Rotated: used successfully at refresh
+    Active --> Revoked: logout or manual revoke
+    Active --> Expired: expiresAt passed
+    Rotated --> ReuseDetected: presented again after rotation
+    ReuseDetected --> FamilyRevoked: cascade revoke entire family
+    Revoked --> [*]
+    Expired --> [*]
+    FamilyRevoked --> [*]
+    </pre>
+  </section>
+
+  <section class="diagram">
+    <h2><span class="num">6</span>End-to-End Overview</h2>
+    <p class="desc">How the three endpoints and the database interact across a session's lifetime.</p>
+    <pre class="mermaid">
+flowchart TD
+    A[POST /auth/login] -->|creates family| B[(RefreshToken row: Active)]
+    B --> C[POST /auth/refresh]
+    C -->|rotate| D[(old row: Rotated / new row: Active)]
+    D --> C
+    D --> E[POST /auth/logout]
+    E -->|revoke current| F[(row: Revoked)]
+    C -->|token reused after rotation| G{Reuse detected?}
+    G -->|yes| H[(ALL rows in family: Revoked)]
+    G -->|no| D
+    </pre>
+  </section>
+
+  <footer>
+    Diagrams rendered with Mermaid.js &middot; pairs with <span>login-golden-standard.html</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = "auth-doc-theme";
+    var saved = localStorage.getItem(key);
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
+
+    var originals = [];
+    document.querySelectorAll(".mermaid").forEach(function (el) {
+      originals.push(el.textContent);
+    });
+
+    function renderMermaid() {
+      var theme = root.getAttribute("data-theme") === "dark" ? "dark" : "default";
+      mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: "loose" });
+      var nodes = document.querySelectorAll(".mermaid");
+      nodes.forEach(function (el, i) {
+        el.removeAttribute("data-processed");
+        el.textContent = originals[i];
+      });
+      mermaid.run({ querySelector: ".mermaid" });
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var current = root.getAttribute("data-theme");
+      var next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem(key, next);
+      renderMermaid();
+    });
+
+
+    renderMermaid();
+  })();
+</script>
+</body>
+</html>
+

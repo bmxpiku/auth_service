@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Golden Standard: Login with Access/Refresh Tokens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-2: #f1f3f6;
+    --text: #16181d;
+    --muted: #667085;
+    --border: #e3e6ea;
+    --accent: #4f46e5;
+    --accent-2: #7c3aed;
+    --accent-soft: #eef0ff;
+    --code-bg: #f4f5f9;
+    --good: #0f9d58;
+    --bad: #d93025;
+    --table-stripe: #fafbfc;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -6px rgba(16, 24, 40, 0.08);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #0d0f14;
+    --surface: #14171e;
+    --surface-2: #1a1e27;
+    --text: #eef0f4;
+    --muted: #9aa2b1;
+    --border: #262b36;
+    --accent: #818cf8;
+    --accent-2: #a78bfa;
+    --accent-soft: #1c1e33;
+    --code-bg: #171a22;
+    --good: #34d399;
+    --bad: #f87171;
+    --table-stripe: #171a22;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--accent-soft), transparent),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+  header.doc-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.5rem;
+    margin: 0 -1.5rem 2.5rem;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px) saturate(140%);
+    border-bottom: 1px solid var(--border);
+  }
+  header.doc-header .title-block { display: flex; align-items: center; gap: 0.7rem; }
+  header.doc-header .logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 1rem; flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  header.doc-header h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  header.doc-header p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+  .toolbar { display: flex; gap: 0.5rem; }
+  button.toggle {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  button.toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
+  button.toggle:active { transform: translateY(0); }
+
+  .hero { text-align: left; margin-bottom: 2.5rem; }
+  .hero .eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 0.9rem;
+  }
+  .hero h2.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.6rem;
+    background: linear-gradient(135deg, var(--text), var(--muted));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.lede { color: var(--muted); font-size: 1.02rem; max-width: 62ch; margin: 0; }
+
+  section.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.8rem 1.9rem;
+    margin-top: 1.6rem;
+  }
+  section.card h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    letter-spacing: -0.01em;
+  }
+  section.card h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 0.8rem; font-weight: 800; flex-shrink: 0;
+  }
+  h3 { font-size: 0.98rem; margin-top: 1.3rem; font-weight: 600; }
+  p { color: var(--text); margin: 0.5rem 0; }
+  .muted { color: var(--muted); }
+
+  code, .code {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.87em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th, td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  th {
+    background: var(--surface-2);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  tr:nth-child(even) td { background: var(--table-stripe); }
+
+  ul, ol { padding-left: 1.3rem; margin: 0.6rem 0; }
+  li { margin-bottom: 0.4rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 0.4rem; }
+  .box {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.3rem;
+    background: var(--surface-2);
+  }
+  .box h4 {
+    margin: 0 0 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .box.good h4 { color: var(--good); }
+  .box.bad h4 { color: var(--bad); }
+  .box ul { list-style: none; padding-left: 0; }
+  .box.good li::before { content: "\2713  "; color: var(--good); font-weight: 700; }
+  .box.bad li::before { content: "\2717  "; color: var(--bad); font-weight: 700; }
+
+  .badge {
+    display: inline-block;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 0.4rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    header.doc-header { flex-wrap: wrap; }
+  }
+
+  /* ===== Print: monochrome A4 ===== */
+  @page { size: A4; margin: 18mm 16mm; }
+  @media print {
+    html, html[data-theme="dark"] {
+      --bg: #ffffff; --surface: #ffffff; --surface-2: #ffffff;
+      --text: #000000; --muted: #333333; --border: #000000;
+      --accent: #000000; --accent-2: #000000; --accent-soft: #ffffff;
+      --code-bg: #ffffff; --table-stripe: #ffffff; --shadow: none;
+    }
+    body { background: #fff; font-size: 11pt; }
+    header.doc-header { position: static; backdrop-filter: none; }
+    .toolbar { display: none !important; }
+    .hero h2.page-title { -webkit-text-fill-color: #000; background: none; color: #000; }
+    section.card { box-shadow: none; border: 1px solid #000; }
+    pre, .box { border: 1px solid #000; }
+    th { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr:nth-child(even) td { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { page-break-after: avoid; }
+    section.card, table, pre { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="doc-header">
+    <div class="title-block">
+      <div class="logo">A</div>
+      <div>
+        <h1>Golden Standard &mdash; Login &amp; Tokens</h1>
+        <p>auth_service &middot; mentoring reference &middot; 2026</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="toggle" id="themeToggle" type="button">&#9788; Toggle theme</button>
+      <button class="toggle" onclick="window.print()" type="button">&#128424; Print / PDF</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Reference document</span>
+    <h2 class="page-title">Golden Standard: Login with Access &amp; Refresh Tokens</h2>
+    <p class="lede">A concise, opinionated blueprint for building a secure, modern login flow using short-lived JWT access tokens and rotating, DB-backed refresh tokens.</p>
+  </div>
+
+  <section class="card">
+  <h2><span class="num">1</span>Core Principles</h2>
+  <ul>
+    <li><strong>Two tokens, two jobs.</strong> The access token proves identity for API calls; the refresh token exists only to obtain new access tokens.</li>
+    <li><strong>Short-lived access, long-lived refresh.</strong> Access tokens expire in minutes; refresh tokens in days/weeks.</li>
+    <li><strong>Stateless access, stateful refresh.</strong> Access tokens are verified by signature only (no DB lookup). Refresh tokens are opaque and checked against the database on every use.</li>
+    <li><strong>Never store secrets in plaintext.</strong> Refresh tokens are hashed before being stored, exactly like passwords.</li>
+    <li><strong>Rotate on every use, detect reuse.</strong> A refresh token is single-use. Presenting an already-used one is treated as a theft signal.</li>
+    <li><strong>Transport matters as much as content.</strong> Delivery mechanism (cookie vs header) determines your XSS/CSRF exposure.</li>
+  </ul>
+
+  <h2>2. Token Specification</h2>
+  <table>
+    <thead>
+      <tr><th>Property</th><th>Access Token</th><th>Refresh Token</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Format</td><td>JWT (signed, e.g. via <code>jose</code>)</td><td>Opaque random string (e.g. 256-bit, <code>crypto.randomBytes</code>)</td></tr>
+      <tr><td>Lifetime</td><td>5&ndash;15 minutes</td><td>7&ndash;30 days</td></tr>
+      <tr><td>Storage server-side</td><td>None &mdash; stateless</td><td>Hashed value in DB, linked to user + token family</td></tr>
+      <tr><td>Storage client-side</td><td>Memory / response body</td><td><code>httpOnly</code>, <code>Secure</code>, <code>SameSite</code> cookie</td></tr>
+      <tr><td>Verified by</td><td>Signature + expiry check</td><td>DB lookup by hash + expiry + revocation check</td></tr>
+      <tr><td>Revocable instantly?</td><td>No (must wait for expiry)</td><td>Yes (flag row as revoked)</td></tr>
+      <tr><td>Contains</td><td><code>sub</code>, <code>iat</code>, <code>exp</code>, optional <code>jti</code></td><td>No claims &mdash; just a random identifier</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. The Golden Flow</h2>
+  <ol>
+    <li><strong>Login</strong> &mdash; client sends email/password. Server verifies credentials with a constant-time check, generating a generic error on any failure (never reveal whether the email exists).</li>
+    <li><strong>Issue</strong> &mdash; on success, server creates a new <em>token family</em>: one access token (returned in body) + one refresh token (hashed &amp; stored, raw value set as <code>httpOnly</code> cookie).</li>
+    <li><strong>Use</strong> &mdash; client attaches the access token to API calls until it expires.</li>
+    <li><strong>Refresh</strong> &mdash; when the access token expires, client calls <code>/auth/refresh</code>. The cookie carries the refresh token automatically. Server verifies it, marks it revoked, issues a brand-new access + refresh pair in the <em>same family</em>.</li>
+    <li><strong>Reuse detection</strong> &mdash; if a refresh token that is already marked revoked is presented again, the server assumes the token was stolen and revokes the <em>entire family</em>, forcing full re-login.</li>
+    <li><strong>Logout</strong> &mdash; client calls <code>/auth/logout</code>; server revokes the current refresh token and clears the cookie.</li>
+  </ol>
+
+  <h2>4. Security Checklist</h2>
+  <div class="grid-2">
+    <div class="box">
+      <h4>Do</h4>
+      <ul class="checklist">
+        <li>Hash refresh tokens before storing (argon2/sha256)</li>
+        <li>Rotate refresh tokens on every use</li>
+        <li>Detect &amp; react to refresh token reuse</li>
+        <li>Use <code>httpOnly</code> + <code>Secure</code> + <code>SameSite</code> cookies</li>
+        <li>Return generic "invalid credentials" errors</li>
+        <li>Rate-limit the login endpoint per IP</li>
+        <li>Keep access tokens short-lived (&le; 15 min)</li>
+        <li>Sign JWTs with a strong secret / asymmetric key</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h4>Avoid</h4>
+      <ul class="anti">
+        <li>Storing refresh tokens as JWTs (defeats instant revocation)</li>
+        <li>Storing raw refresh tokens in the database</li>
+        <li>Putting refresh tokens in <code>localStorage</code></li>
+        <li>Long-lived access tokens (hours/days)</li>
+        <li>Reusable refresh tokens (no rotation)</li>
+        <li>Leaking "user not found" vs "wrong password" distinctly</li>
+        <li>Skipping expiry/revocation checks on refresh</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>5. Minimal Data Model</h2>
+  <pre><code>RefreshToken {
+  id                 string (uuid)
+  tokenHash          string   // hash of the raw token, never the raw value
+  userId             string   // FK -> User
+  familyId           string   // groups all tokens issued from one login
+  expiresAt          datetime
+  revokedAt          datetime | null
+  replacedByTokenId  string | null
+  createdAt          datetime
+}</code></pre>
+  </section>
+
+  <section class="card">
+  <h2><span class="num">6</span>Endpoint Contract</h2>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Input</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /auth/login</code></td><td>email, password</td><td>access token (body) + refresh cookie</td></tr>
+      <tr><td><code>POST /auth/refresh</code></td><td>refresh cookie</td><td>new access token (body) + new refresh cookie</td></tr>
+      <tr><td><code>POST /auth/logout</code></td><td>refresh cookie</td><td>204, cookie cleared, token revoked</td></tr>
+    </tbody>
+  </table>
+  </section>
+
+  <footer>
+    Golden standard reference &middot; pairs with the companion diagram document <span class="badge">token-lifecycle-diagrams.html</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = "auth-doc-theme";
+    var saved = localStorage.getItem(key);
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
+
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var current = root.getAttribute("data-theme");
+      var next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem(key, next);
+    });
+  })();
+</script>
+</body>
+</html>
+
