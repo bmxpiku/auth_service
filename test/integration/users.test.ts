@@ -8,9 +8,10 @@ import { resetTestDatabase } from "../clearDb.js";
 describe("POST /users", () => {
   let app: FastifyInstance;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const config = loadConfig();
     app = createApp(config);
+    await app.ready();
   });
 
   afterAll(async () => {

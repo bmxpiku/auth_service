@@ -25,7 +25,7 @@ export default async function usersRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     async (request, reply) => {
-      const user = await createUser(request.body);
+      const user = await createUser(request.server.db, request.body);
 
       return reply.status(201).send({
         id: user.id,
