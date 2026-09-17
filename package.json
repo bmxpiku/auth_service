@@ -39,6 +39,7 @@
     "argon2": "^0.45.1",
     "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
+    "jose": "^6.2.12",
     "json-schema-to-ts": "^3.1.1",
     "pg": "^8.23.0",
     "zod": "^4.4.3"

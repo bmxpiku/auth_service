@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mapa architektury — auth_service</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-border: #2a2f3a;
+    --text: #e6e8ec;
+    --muted: #9aa3af;
+    --accent: #5eb1ff;
+    --accent2: #8ee6b8;
+    --warn: #ffb454;
+    --code-bg: #10131a;
+    --shadow: rgba(0, 0, 0, 0.35);
+    --mono: "Courier New", Consolas, monospace;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --panel-border: #d7dce3;
+    --text: #1b1f27;
+    --muted: #5b6472;
+    --accent: #1266d1;
+    --accent2: #157a4a;
+    --warn: #a8590a;
+    --code-bg: #eef1f5;
+    --shadow: rgba(20, 30, 50, 0.1);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    transition: background-color .2s, color .2s;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 0;
+    background: linear-gradient(var(--bg) 70%, transparent);
+    margin-bottom: 6px;
+  }
+
+  .toolbar button {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+
+  .toolbar button:hover { border-color: var(--accent); }
+
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .flow .node {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 12px;
+    position: relative;
+  }
+
+  .flow .node::after {
+    content: "→";
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .flow .node:last-child::after { content: ""; }
+
+  .flow .node .tag {
+    display: block;
+    color: var(--accent);
+    font-family: var(--mono), monospace;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card h2 {
+    font-size: 14px;
+    margin: 0 0 6px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card .path {
+    font-family: var(--mono), monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    font-size: 12.5px;
+    color: var(--text);
+    margin: 0 0 8px;
+    line-height: 1.45;
+  }
+
+  .card ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .card li { margin-bottom: 3px; }
+
+  .card .details {
+    display: none;
+    margin-top: 8px;
+    border-top: 1px dashed var(--panel-border);
+    padding-top: 8px;
+  }
+
+  .card.open .details { display: block; }
+  .card .hint { font-size: 10.5px; color: var(--muted); font-style: italic; }
+
+  section.group {
+    margin-bottom: 30px;
+  }
+
+  section.group > h2.group-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--warn);
+    margin: 0 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  .legend {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  code {
+    font-family: var(--mono), monospace;
+    background: var(--code-bg);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--accent2);
+  }
+
+  footer {
+    margin-top: 30px;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--panel-border);
+    padding-top: 10px;
+    text-align: right;
+  }
+
+  @media (max-width: 900px) {
+    .flow { grid-template-columns: repeat(3, 1fr); }
+    .flow .node::after { display: none; }
+  }
+  @media (max-width: 560px) {
+    .flow { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Print — optimized for A4, both portrait and landscape            */
+  /* ---------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  /* Named page for landscape printing (Chrome/Edge support CSS named
+     pages via the `page` property; other browsers gracefully fall back
+     to the default @page size above). Toggled by body.print-landscape. */
+  @page landscape-a4 {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  @media print {
+    .no-print { display: none !important; }
+    html, body {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+    .wrap {
+      max-width: none;
+      padding: 0;
+    }
+    body.print-landscape .wrap {
+      page: landscape-a4;
+    }
+    h1 { color: #000; border-bottom: 2px solid #000; padding-bottom: 4px; }
+    .subtitle, .legend, .card .hint { color: #333 !important; }
+    .flow {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4mm;
+      margin-bottom: 6mm;
+    }
+    .flow .node {
+      background: #f2f2f2 !important;
+      border: 1px solid #666 !important;
+      color: #000 !important;
+      break-inside: avoid;
+    }
+    .flow .node .tag { color: #000 !important; }
+    section.group {
+      break-inside: avoid;
+      margin-bottom: 5mm;
+    }
+    section.group > h2.group-title {
+      background: #000;
+      color: #fff !important;
+      padding: 2px 5px;
+      border-bottom: none;
+    }
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3mm;
+    }
+    body.print-landscape .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .card {
+      background: #fff !important;
+      border: 1px solid #999 !important;
+      box-shadow: none !important;
+      break-inside: avoid;
+      padding: 3mm;
+      cursor: default;
+    }
+    .card:hover { transform: none; border-color: #999 !important; }
+    .card h2 { color: #000 !important; }
+    .card p { color: #000 !important; }
+    .card ul { color: #222 !important; }
+    .card .path { color: #333 !important; }
+    /* Force every card open — an accordion makes no sense on paper */
+    .card .details {
+      display: block !important;
+      border-top: 1px dashed #999;
+    }
+    code {
+      background: #eee !important;
+      color: #111 !important;
+      border: 1px solid #ccc;
+    }
+    footer {
+      color: #444 !important;
+      border-top: 1px solid #999;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar no-print">
+    <button type="button" id="theme-toggle" title="Przełącz jasny/ciemny motyw">
+      <span id="theme-icon" aria-hidden="true">🌙</span>
+      <span id="theme-label">Ciemny</span>
+    </button>
+    <button type="button" id="print-portrait" title="Drukuj w orientacji pionowej (A4)">🖨️ Pion (A4)</button>
+    <button type="button" id="print-landscape" title="Drukuj w orientacji poziomej (A4)">🖨️ Poziom (A4)</button>
+  </div>
+  <h1>Mapa architektury — auth_service</h1>
+  <div class="subtitle">
+    Fastify 5 + TypeScript (ESM, Node.js ≥ 24). Kliknij dowolny blok, aby rozwinąć szczegóły.
+    Zobacz też: <code>docs/tutorial/</code> (rozdziały z diagramami Mermaid).
+  </div>
+
+  <div class="legend">Cykl życia żądania HTTP (uproszczony, przykład <code>POST /users</code>):</div>
+  <div class="flow">
+    <div class="node"><span class="tag">1</span>server.ts<br/>listen()</div>
+    <div class="node"><span class="tag">2</span>app.ts<br/>createApp()</div>
+    <div class="node"><span class="tag">3</span>routes/*<br/>AJV validate</div>
+    <div class="node"><span class="tag">4</span>lib/*<br/>logika + Prisma</div>
+    <div class="node"><span class="tag">5</span>errors/*<br/>errorHandler</div>
+    <div class="node"><span class="tag">6</span>reply<br/>JSON response</div>
+  </div>
+
+  <section class="group">
+    <h2 class="group-title">Start i konfiguracja</h2>
+    <div class="grid">
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🚀 server.ts</h2>
+        <span class="path">src/server.ts</span>
+        <p>Punkt wejścia procesu Node.js. Ładuje config, tworzy aplikację, nasłuchuje na porcie.</p>
+        <div class="details">
+          <ul>
+            <li><code>loadConfig()</code> zawsze przed <code>createApp()</code></li>
+            <li><code>close-with-grace</code> — graceful shutdown na SIGINT/SIGTERM</li>
+            <li>Hook <code>onClose</code> odinstalowuje listenery sygnałów</li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/00-przeglad.md</div>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🏭 app.ts</h2>
+        <span class="path">src/app.ts</span>
+        <p>Fabryka aplikacji Fastify. Używana zarówno przez server.ts, jak i testy (app.inject()).</p>
+        <div class="details">
+          <ul>
+            <li>Konfiguruje AJV: <code>removeAdditional: false</code> + <code>ajv-formats</code></li>
+            <li><code>setErrorHandler(errorHandler)</code></li>
+            <li>Ręczna rejestracja tras — brak autoloadingu</li>
+            <li>Hook <code>onClose</code> → <code>closeDb()</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>⚙️ config/</h2>
+        <span class="path">src/config/{env,configLoader,loggerConfig}.ts</span>
+        <p>Walidacja zmiennych środowiskowych (Zod) + singleton konfiguracji.</p>
+        <div class="details">
+          <ul>
+            <li><code>loadConfig()</code> — raz, na starcie / w beforeAll testów</li>
+            <li><code>getConfig()</code> — wewnątrz handlerów, rzuca jeśli nie załadowano</li>
+            <li>Logger wyłączony gdy <code>NODE_ENV=test</code>; redakcja pól wrażliwych</li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/02-konfiguracja-i-start.md</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <h2 class="group-title">Warstwa HTTP</h2>
+    <div class="grid">
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🛣️ routes/</h2>
+        <span class="path">src/routes/{health,users}.ts</span>
+        <p>Pluginy Fastify — jeden plik na zasób, jawnie rejestrowane w app.ts.</p>
+        <div class="details">
+          <ul>
+            <li><code>export default async function xRoutes(app)</code></li>
+            <li>Schemat body/response podłączony przez <code>schema: {...}</code></li>
+            <li>Błędy: <code>throw new XError(...)</code>, nigdy ręczny <code>reply.send</code></li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/01-fastify-podstawy.md</div>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>📐 schemas/</h2>
+        <span class="path">src/schemas/{health,users}.ts</span>
+        <p>JSON Schema (json-schema-to-ts) — jedno źródło prawdy dla walidacji runtime i typów TS.</p>
+        <div class="details">
+          <ul>
+            <li><code>as const satisfies JSONSchema</code></li>
+            <li><code>FromSchema&lt;typeof schema&gt;</code> → typ TS</li>
+            <li><code>additionalProperties: false</code> + <code>removeAdditional: false</code> → 400 zamiast cichego strip</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <h2 class="group-title">Logika i dane</h2>
+    <div class="grid">
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🗄️ lib/db.ts</h2>
+        <span class="path">src/lib/db.ts</span>
+        <p>Singleton Prisma Client, leniwie inicjalizowany przez PrismaPg adapter.</p>
+        <div class="details">
+          <ul>
+            <li><code>getDb()</code> — nigdy <code>new PrismaClient()</code> bezpośrednio</li>
+            <li>Zależy od <code>getConfig()</code> → wołaj wyłącznie w handlerach</li>
+            <li><code>closeDb()</code> wołane w hooku <code>onClose</code></li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/04-baza-danych-prisma.md</div>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🧩 lib/prismaErrors.ts</h2>
+        <span class="path">src/lib/prismaErrors.ts</span>
+        <p>withPrismaError() mapuje kody błędów Prisma na wyjątki domenowe.</p>
+        <div class="details">
+          <ul>
+            <li><code>P2002</code> (unikalność) → <code>ConflictError</code> (409)</li>
+            <li><code>P2025</code> (brak rekordu) → <code>NotFoundError</code> (404)</li>
+            <li>Buduje <code>diagnostics</code>: operation, model, prismaCode, constraint</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>📧 lib/email.ts</h2>
+        <span class="path">src/lib/email.ts</span>
+        <p>normalizeEmail() — trim + lowercase przed zapisem/odczytem, dla case-insensitive unikalności.</p>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🔑 lib/jwt.ts</h2>
+        <span class="path">src/lib/jwt.ts</span>
+        <p>Narzędzia demo do generowania/weryfikacji tokenów RS256 (biblioteka jose). Obecnie nieużywane w trasach.</p>
+        <div class="details">
+          <ul>
+            <li>Teoria JWT/JWS/JWE: <code>docs/jwt-manual.md</code>, <code>docs/jwt-cheatsheet.html</code></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <h2 class="group-title">Błędy</h2>
+    <div class="grid">
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>💥 errors/AppError.ts</h2>
+        <span class="path">src/errors/AppError.ts</span>
+        <p>Bazowa klasa błędu domenowego: statusCode, code, cause, context.</p>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🏷️ errors/domain/*</h2>
+        <span class="path">src/errors/domain/*.ts</span>
+        <p>Konkretne podtypy z ustalonym kodem HTTP i machine-readable kodem.</p>
+        <div class="details">
+          <ul>
+            <li><code>ConflictError</code> 409 · <code>NotFoundError</code> 404</li>
+            <li><code>UnauthorizedError</code> 401 · <code>ForbiddenError</code> 403</li>
+            <li><code>ValidationError</code> 400 · <code>UnprocessableError</code> 422</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🛡️ errors/errorHandler.ts</h2>
+        <span class="path">src/errors/errorHandler.ts</span>
+        <p>Jedyne miejsce, które loguje i wysyła odpowiedź błędu. Rejestrowane przez setErrorHandler.</p>
+        <div class="details">
+          <ul>
+            <li>Błąd walidacji AJV → 400 + <code>details</code></li>
+            <li><code>AppError</code> → status/code z instancji, log tylko jeśli <code>cause</code></li>
+            <li>Inny błąd → log pełny, klientowi generyczne 500</li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/03-obsluga-bledow.md, docs/prisma-error-handling.md</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <h2 class="group-title">Dane i testy</h2>
+    <div class="grid">
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🧬 prisma/schema.prisma</h2>
+        <span class="path">prisma/schema.prisma</span>
+        <p>Jeden model: User (id uuid(7), email unique, passwordHash, createdAt, updatedAt).</p>
+        <div class="details">
+          <ul>
+            <li>Generator → <code>src/generated/prisma/</code> (nie edytować ręcznie)</li>
+            <li>Adapter <code>@prisma/adapter-pg</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>✅ test/*.test.ts</h2>
+        <span class="path">test/health.test.ts</span>
+        <p>Testy jednostkowe/trasowe przez app.inject() — bez realnej bazy i portu.</p>
+      </div>
+
+      <div class="card" role="button" tabindex="0" onclick="this.classList.toggle('open')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('open');}">
+        <h2>🧪 test/integration/*</h2>
+        <span class="path">test/integration/users.test.ts</span>
+        <p>Testy na realnym Postgresie (db-test, port 5433), sekwencyjne, resetTestDatabase() w beforeEach.</p>
+        <div class="details">
+          <ul>
+            <li><code>npm run db:up:test</code> → <code>db:migrate:test</code> → <code>test:db</code></li>
+            <li><code>fileParallelism: false</code> — współdzielona baza</li>
+          </ul>
+          <div class="hint">Zobacz: docs/tutorial/05-testowanie.md</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>auth_service — wewnętrzna dokumentacja onboardingowa · docs/tutorial/architecture-map.html</footer>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggleBtn = document.getElementById("theme-toggle");
+    var icon = document.getElementById("theme-icon");
+    var label = document.getElementById("theme-label");
+    var STORAGE_KEY = "auth-service-arch-map-theme";
+    function applyTheme(theme) {
+      if (theme === "light") {
+        root.setAttribute("data-theme", "light");
+        icon.textContent = "☀️";
+        label.textContent = "Jasny";
+      } else {
+        root.setAttribute("data-theme", "dark");
+        icon.textContent = "🌙";
+        label.textContent = "Ciemny";
+      }
+    }
+    var preferredLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    var stored = null;
+    try {
+      stored = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      /* localStorage unavailable (e.g. file:// in some browsers) — ignore */
+    }
+    applyTheme(stored || (preferredLight ? "light" : "dark"));
+    toggleBtn.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      applyTheme(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch (e) {
+        /* ignore persistence errors */
+      }
+    });
+    function printAs(orientation) {
+      document.body.classList.remove("print-landscape");
+      if (orientation === "landscape") {
+        document.body.classList.add("print-landscape");
+      }
+      window.print();
+    }
+    document.getElementById("print-portrait").addEventListener("click", function () {
+      printAs("portrait");
+    });
+    document.getElementById("print-landscape").addEventListener("click", function () {
+      printAs("landscape");
+    });
+    window.addEventListener("afterprint", function () {
+      document.body.classList.remove("print-landscape");
+    });
+  })();
+</script>
+</body>
+</html>
+
+
