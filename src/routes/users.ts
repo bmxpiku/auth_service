@@ -1,11 +1,10 @@
 import type { FastifyInstance } from "fastify";
+import { type ErrorReply, errorReplySchema } from "../schemas/common.js";
 import {
   type CreateUserBody,
   type CreateUserReply201,
   createUserBodySchema,
   createUserReply201Schema,
-  type ErrorReply,
-  errorReplySchema,
 } from "../schemas/users.js";
 import { createUser } from "../services/users.service.js";
 
