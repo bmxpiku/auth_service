@@ -31,18 +31,3 @@ export const createUserReply201Schema = {
 } as const satisfies JSONSchema;
 
 export type CreateUserReply201 = FromSchema<typeof createUserReply201Schema>;
-
-export const errorReplySchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    error: { type: "string" },
-    message: { type: "string" },
-    details: {
-      type: "array",
-      items: { type: "object" },
-    },
-  },
-} as const satisfies JSONSchema;
-
-export type ErrorReply = FromSchema<typeof errorReplySchema>;

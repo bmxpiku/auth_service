@@ -3,6 +3,7 @@ import type { AppConfig } from "./config/env.js";
 import { buildFastifyOptions } from "./config/fastifyOptions.js";
 import { errorHandler } from "./errors/errorHandler.js";
 import { dbPlugin } from "./plugins/db.js";
+import authRoutes from "./routes/auth.js";
 import healthRoutes from "./routes/health.js";
 import usersRoutes from "./routes/users.js";
 
@@ -16,6 +17,7 @@ export function createApp(config: AppConfig): FastifyInstance {
   app.register(dbPlugin, { connectionString: config.DATABASE_URL });
   app.register(healthRoutes);
   app.register(usersRoutes);
+  app.register(authRoutes);
 
   return app;
 }
