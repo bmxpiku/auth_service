@@ -32,13 +32,13 @@
     "**/*.ts": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
-    "@fastify/autoload": "^6.5.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "ajv-formats": "^3.0.1",
     "argon2": "^0.45.1",
     "close-with-grace": "^2.5.0",
     "fastify": "^5.11.2",
+    "fastify-plugin": "^6.0.0",
     "jose": "^6.2.12",
     "json-schema-to-ts": "^3.1.1",
     "pg": "^8.23.0",
