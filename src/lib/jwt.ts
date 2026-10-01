@@ -1,4 +1,4 @@
-import { type CryptoKey, type GenerateKeyPairResult, generateKeyPair, jwtVerify, SignJWT } from "jose";
+import { type GenerateKeyPairResult, generateKeyPair, jwtVerify, SignJWT } from "jose";
 
 export const ISSUER = "auth-service";
 export const AUDIENCE = "users-api";
@@ -32,25 +32,6 @@ function getSigningKeyPair() {
   keyPairPromise ??= generateRsaKeyPair();
 
   return keyPairPromise;
-}
-
-export async function signDemoToken(privateKey: CryptoKey, options: { sub?: string; expiresIn?: string } = {}) {
-  return new SignJWT()
-    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
-    .setSubject(options.sub ?? "demo-user")
-    .setIssuer(ISSUER)
-    .setAudience(AUDIENCE)
-    .setIssuedAt()
-    .setExpirationTime(options.expiresIn ?? "10s")
-    .sign(privateKey);
-}
-
-export async function verifyDemoToken(token: string, publicKey: CryptoKey) {
-  return jwtVerify(token, publicKey, {
-    algorithms: ["RS256"],
-    issuer: ISSUER,
-    audience: AUDIENCE,
-  });
 }
 
 export async function signAccessToken(userId: string): Promise<string> {

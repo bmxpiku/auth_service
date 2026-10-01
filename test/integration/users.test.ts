@@ -34,8 +34,6 @@ describe("POST /users", () => {
     expect(response.statusCode).toBe(201);
     const body = response.json();
 
-    // toEqual sprawdza dokładny kształt obiektu — dodatkowe pole (np. passwordHash)
-    // wywaliłoby test, nawet gdybyśmy zapomnieli dopisać dla niego osobną asercję.
     expect(body).toEqual({
       id: expect.any(String),
       email: payload.email,
