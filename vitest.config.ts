@@ -7,6 +7,7 @@ export default defineConfig({
     },
     env: {
       DATABASE_URL: "postgresql://test_user:test_pass@localhost:5433/test_db",
+      COOKIE_SECRET: "test-cookie-secret-at-least-32-characters-long",
     },
     exclude: ["test/integration/**", "node_modules/**"],
   },

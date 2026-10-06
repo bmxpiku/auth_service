@@ -32,6 +32,8 @@
     "**/*.ts": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/rate-limit": "^11.2.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "ajv-formats": "^3.0.1",
