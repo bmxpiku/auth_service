@@ -20,6 +20,7 @@
     "dev": "tsx watch src/server.ts",
     "format": "biome format --write",
     "postinstall": "prisma generate",
+    "jwt:generate-key": "tsx scripts/generate-jwt-key.ts",
     "prepare": "husky",
     "qc": "npm run check && npm run typecheck && npm test && npm run test:db",
     "start": "node dist/server.js",
@@ -32,6 +33,7 @@
     "**/*.ts": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
+    "@fastify/jwt": "^10.2.4",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "ajv-formats": "^3.0.1",

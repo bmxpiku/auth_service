@@ -1,8 +1,23 @@
-import { JWSSignatureVerificationFailed, JWTExpired } from "jose/errors";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { decodeSegment, signAccessToken, splitToken, verifyAccessToken } from "./jwt.js";
+import { SignJWT } from "jose";
+import { JWSSignatureVerificationFailed, JWTClaimValidationFailed, JWTExpired } from "jose/errors";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { loadConfig } from "../config/configLoader.js";
+import {
+  ALGORITHM,
+  AUDIENCE,
+  decodeSegment,
+  getSigningKeyPair,
+  ISSUER,
+  signAccessToken,
+  splitToken,
+  verifyAccessToken,
+} from "./jwt.js";
 
 describe("access tokens", () => {
+  beforeAll(() => {
+    loadConfig();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -28,6 +43,51 @@ describe("access tokens", () => {
     const tamperedToken = `${headerB64}.${tamperedPayloadB64}.${signatureB64}`;
 
     await expect(verifyAccessToken(tamperedToken)).rejects.toThrow(JWSSignatureVerificationFailed);
+  });
+
+  it("rejects a token signed for a different issuer", async () => {
+    const { privateKey } = await getSigningKeyPair();
+
+    const tokenWithWrongIssuer = await new SignJWT()
+      .setProtectedHeader({ alg: ALGORITHM, typ: "JWT" })
+      .setSubject("test-user-id")
+      .setIssuer("some-other-issuer") // celowo błędny iss
+      .setAudience(AUDIENCE)
+      .setIssuedAt()
+      .setExpirationTime("15m")
+      .sign(privateKey);
+
+    await expect(verifyAccessToken(tokenWithWrongIssuer)).rejects.toThrow(JWTClaimValidationFailed);
+  });
+
+  it("rejects a token signed for a different audience", async () => {
+    const { privateKey } = await getSigningKeyPair();
+
+    const tokenWithWrongAudience = await new SignJWT()
+      .setProtectedHeader({ alg: ALGORITHM, typ: "JWT" })
+      .setSubject("test-user-id")
+      .setIssuer(ISSUER)
+      .setAudience("some-other-api") // celowo błędny aud
+      .setIssuedAt()
+      .setExpirationTime("15m")
+      .sign(privateKey);
+
+    await expect(verifyAccessToken(tokenWithWrongAudience)).rejects.toThrow(JWTClaimValidationFailed);
+  });
+
+  it("rejects a token that has no sub claim", async () => {
+    const { privateKey } = await getSigningKeyPair();
+
+    const tokenWithoutSub = await new SignJWT()
+      .setProtectedHeader({ alg: ALGORITHM, typ: "JWT" })
+      // celowo bez .setSubject(...)
+      .setIssuer(ISSUER)
+      .setAudience(AUDIENCE)
+      .setIssuedAt()
+      .setExpirationTime("15m")
+      .sign(privateKey);
+
+    await expect(verifyAccessToken(tokenWithoutSub)).rejects.toThrow("Invalid token payload");
   });
 
   it("rejects an expired token", async () => {
