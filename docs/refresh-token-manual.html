@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="pl" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Refresh Token — Podręcznik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-2: #f1f3f6;
+    --text: #16181d;
+    --muted: #667085;
+    --border: #e3e6ea;
+    --accent: #4f46e5;
+    --accent-2: #7c3aed;
+    --accent-soft: #eef0ff;
+    --good-bg: #eaf6ee;
+    --good-text: #15803d;
+    --bad-bg: #fbeaea;
+    --bad-text: #b42318;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -6px rgba(16, 24, 40, 0.08);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #0d0f14;
+    --surface: #14171e;
+    --surface-2: #1a1e27;
+    --text: #eef0f4;
+    --muted: #9aa2b1;
+    --border: #262b36;
+    --accent: #818cf8;
+    --accent-2: #a78bfa;
+    --accent-soft: #1c1e33;
+    --good-bg: #122118;
+    --good-text: #4ade80;
+    --bad-bg: #241616;
+    --bad-text: #f87171;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--accent-soft), transparent),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+  header.doc-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.5rem;
+    margin: 0 0 2rem;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  header.doc-header h1 { font-size: 1rem; margin: 0; font-weight: 700; }
+  header.doc-header .sub { color: var(--muted); font-size: 0.8rem; }
+  button#theme-toggle {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  button#theme-toggle:hover { border-color: var(--accent); }
+
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow);
+  }
+  nav.toc h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 0.75rem; }
+  nav.toc ol { margin: 0; padding-left: 1.2rem; }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.75rem;
+    box-shadow: var(--shadow);
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+  p { color: var(--text); }
+  .muted { color: var(--muted); }
+  blockquote {
+    margin: 1rem 0;
+    padding: 0.85rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+  }
+  code {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.85em;
+  }
+  pre {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.82rem;
+  }
+  pre code { background: none; border: none; padding: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--surface-2); font-weight: 700; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
+  .pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good-text); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad-text); }
+  .mermaid { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 2rem; }
+  a.back-to-toc { font-size: 0.78rem; color: var(--muted); text-decoration: none; }
+  a.back-to-toc:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-header">
+    <div>
+      <h1>Refresh Token — Podręcznik</h1>
+      <div class="sub">Sesje &middot; Opaque vs JWT &middot; Rotacja &middot; onRequest vs preHandler</div>
+    </div>
+    <button id="theme-toggle" type="button">🌙 Ciemny motyw</button>
+  </header>
+
+  <nav class="toc">
+    <h2>Spis treści</h2>
+    <ol>
+      <li><a href="#sec-1">Czy w systemie JWT nadal istnieje "sesja"?</a></li>
+      <li><a href="#sec-2">Refresh token: opaque czy JWT?</a></li>
+      <li><a href="#sec-3">Rotacja i wykrywanie ponownego użycia</a></li>
+      <li><a href="#sec-3a">Kiedy wywoływać /auth/refresh?</a></li>
+      <li><a href="#sec-4">Gdzie na froncie trzymać access token?</a></li>
+      <li><a href="#sec-5">onRequest vs preHandler w Fastify</a></li>
+      <li><a href="#sec-6">Pełny obraz — diagram cyklu życia tokenów</a></li>
+      <li><a href="#sec-7">Szybkie podsumowanie</a></li>
+    </ol>
+  </nav>
+
+  <section id="sec-1">
+    <h2><span class="num">1</span>Czy w systemie JWT nadal istnieje "sesja"?</h2>
+    <p><strong>Krótka odpowiedź:</strong> access token jest celowo bezstanowy
+    (stateless) — ale refresh token celowo przywraca sesję.</p>
+    <p>Klasyczna <em>sesja</em> oznacza, że <strong>serwer trzyma stan</strong>:
+    wiersz (albo wpis w pamięci) mówiący "sesja abc123 należy do użytkownika X,
+    utworzona o czasie T, ważna do T+N". Klient trzyma tylko nieprzezroczyste
+    odwołanie do niej (tradycyjnie ciasteczko w stylu <code>connect.sid</code>).
+    Unieważnienie jest trywialne: usuń wiersz.</p>
+    <p>Podpisany <strong>JWT jako access token odwraca ten model</strong>. Sam
+    token niesie w sobie dane (<code>sub</code>, <code>exp</code>,
+    <code>aud</code>, ...) i sam się weryfikuje dzięki podpisowi — serwer
+    <strong>nie trzyma żadnego stanu per-request</strong>. Właśnie dzięki temu
+    access tokeny JWT są szybkie i skalują się horyzontalnie: dowolny serwis z
+    kluczem publicznym może zweryfikować żądanie bez zapytania do bazy
+    danych.</p>
+    <p>Koszt tej bezstanowości: <strong>nie da się unieważnić pojedynczego
+    access tokenu przedwcześnie.</strong> Jest ważny aż do <code>exp</code>,
+    kropka — chyba że zbudujesz listę odwołanych tokenów (blocklist), co
+    niweczy cały sens "bezstanowości", po którą sięgnąłeś.</p>
+    <table>
+      <thead><tr><th></th><th>Access token</th><th>Refresh token</th></tr></thead>
+      <tbody>
+        <tr><td>Czas życia</td><td>Krótki (minuty)</td><td>Długi (dni/tygodnie)</td></tr>
+        <tr><td>Stanowość</td><td>Bezstanowy (JWT)</td><td><strong>Stanowy</strong> — wiersz w bazie</td></tr>
+        <tr><td>Unieważnienie natychmiast?</td><td><span class="pill bad">Nie</span></td><td><span class="pill good">Tak</span></td></tr>
+        <tr><td>Używany do</td><td>Autoryzacji wywołań API</td><td>Wydawania nowych access tokenów</td></tr>
+      </tbody>
+    </table>
+    <blockquote>Czyli tak — nadal powinieneś mieć "sesję". Jest ona tylko
+    ograniczona do poziomu refresh tokenu, a nie access tokenu. Access token to
+    krótkotrwała, jednorazowa <em>zdolność</em> wyprowadzona z tej sesji,
+    wydawana na nowo co ~15 minut, dopóki sesja (refresh token) jest nadal
+    ważna.</blockquote>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-2">
+    <h2><span class="num">2</span>Refresh token: opaque czy JWT?</h2>
+    <h3>Analogia</h3>
+    <p><strong>JWT</strong> = notatka, którą możesz sam odczytać.
+    <code>header.payload.signature</code> — payload jest jedynie zakodowany w
+    base64url, <strong>nie zaszyfrowany</strong>. Każdy, kto ma token, może go
+    zdekodować i odczytać każdy claim bez żadnego wysiłku. Podpis dowodzi
+    jedynie autentyczności/integralności, nie poufności. Weryfikacja to czysta
+    kryptografia (sprawdzenie podpisu) — <strong>bez zapytania do bazy
+    danych</strong>.</p>
+    <p><strong>Token opaque</strong> = numerek z loterii.
+    <code>crypto.randomBytes(32)</code> → coś w stylu <code>k8F3...Qz1</code>.
+    To <strong>czysta entropia</strong> — nie koduje żadnej informacji o tym,
+    do kogo należy ani kiedy wygasa. Jedyny sposób, by się czegoś o nim
+    dowiedzieć, to sprawdzić go w rejestrze wydawcy (twojej bazie danych).
+    Weryfikacja to <strong>zawsze zapytanie do bazy</strong>.</p>
+    <h3>Porównanie wprost</h3>
+    <table>
+      <thead><tr><th></th><th>JWT jako refresh token</th><th>Opaque jako refresh token</th></tr></thead>
+      <tbody>
+        <tr><td>Format</td><td>Strukturalny, samowystarczalny</td><td>Losowe bajty, bez struktury</td></tr>
+        <tr><td>Weryfikacja</td><td>Sprawdzenie podpisu — bez DB</td><td>Zapytanie do bazy — zawsze</td></tr>
+        <tr><td>Unieważnienie</td><td><span class="pill bad">Trudne</span> (blocklist = i tak stan w bazie)</td><td><span class="pill good">Trywialne</span> — oznacz wiersz</td></tr>
+        <tr><td>Co wycieka po kradzieży</td><td>Wszystkie claimy — czytelne bez klucza</td><td>Nic — nieodróżnialne od szumu</td></tr>
+        <tr><td>Księgowanie rotacji</td><td>Wymaga <code>jti</code> + tabeli w bazie i tak</td><td>Wiersz w bazie <em>jest</em> stanem rotacji</td></tr>
+        <tr><td>Rozmiar</td><td>Większy</td><td>Mały, stały</td></tr>
+      </tbody>
+    </table>
+    <blockquote><strong>Puenta:</strong> jeśli i tak potrzebujesz stanu w
+    bazie — do unieważniania, rotacji, wykrywania reuse — to główna zaleta JWT
+    ("bez zapytania do bazy") nic ci nie daje dla refresh tokenu. Płacisz za
+    weryfikację podpisu, żeby odtworzyć coś, co i tak sprawdzisz w bazie, a w
+    dodatku wyciekają czytelne claimy przy kradzieży.</blockquote>
+    <p><strong>Wniosek przyjęty w tym projekcie:</strong> access token → JWT
+    (bezstanowa weryfikacja, krótkotrwały). Refresh token → losowy opaque,
+    haszowany przed zapisem (jawne odwołanie do sesji, trywialna rotacja i
+    unieważnianie).</p>
+    <pre><code>// nigdy nie zapisuj surowego tokenu — tylko hash
+const raw = crypto.randomBytes(32).toString("base64url");
+const tokenHash = crypto.createHash("sha256").update(raw).digest("hex");
+// raw -&gt; trafia do klienta (cookie)
+// tokenHash -&gt; trafia do bazy danych</code></pre>
+    <p class="muted">Tokeny opaque to dane losowe o wysokiej entropii, nie
+    niskoentropijne sekrety jak hasła — dlatego szybki hash (SHA-256)
+    wystarczy; hasła potrzebują wolnego, solonego hasha jak Argon2.</p>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-3">
+    <h2><span class="num">3</span>Rotacja i wykrywanie ponownego użycia</h2>
+    <p>Refresh token powinien być <strong>jednorazowy</strong>: wymiana go na
+    endpointzie <code>/auth/refresh</code> natychmiast go unieważnia i wydaje
+    zupełnie nowy. To <strong>rotacja refresh tokenów</strong>, i to właśnie
+    ona umożliwia <strong>wykrywanie reuse</strong>.</p>
+    <div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant API as /auth/refresh
+    participant DB as Tabela RefreshToken
+
+    Client->>API: ciasteczko refresh_token = T1
+    API->>DB: szukaj hash(T1)
+    DB-->>API: wiersz znaleziony, revokedAt = null, nie wygasł
+    API->>DB: oznacz T1 jako revoked, utwórz T2 (replacedByTokenId = T1)
+    API-->>Client: Set-Cookie: refresh_token = T2
+
+    Note over Client,API: Później — napastnik ukradł T1 przed rotacją,<br/>albo klient powtórzył żądanie ze starym T1
+
+    Client->>API: ciasteczko refresh_token = T1 (już użyty!)
+    API->>DB: szukaj hash(T1)
+    DB-->>API: wiersz znaleziony, revokedAt != null  🚨 REUSE
+    API->>DB: unieważnij wszystkie tokeny z rodziny T1
+    API-->>Client: 401 — wymuś pełne ponowne logowanie
+    </div>
+    <h3>Dlaczego to wykrywa reuse</h3>
+    <p>Każdy refresh token jest jednorazowy. W momencie wymiany jego wiersz
+    zostaje oznaczony jako <code>revokedAt</code>. Jeśli ten sam surowy token
+    zostanie przedstawiony ponownie, wyszukiwanie znajdzie wiersz, który jest
+    <strong>już</strong> unieważniony — co może się zdarzyć tylko wtedy, gdy
+    ten sam token miały dwie strony. Bezpieczny ruch: <strong>unieważnij całą
+    "rodzinę" tokenów</strong> i wymuś ponowne logowanie.</p>
+
+    <h3>Czym naprawdę jest "rodzina tokenów"</h3>
+    <p>Wyobraź sobie rodzinę tokenów jako <strong>jeden ciągły bieg
+    sztafetowy, zaczynający się od logowania</strong>. Każdy refresh token to
+    jeden biegacz niosący pałeczkę przez chwilę, po czym przekazujący ją
+    kolejnemu (rotacja). <strong>Drużyna</strong> — wszyscy biegacze od
+    pierwszego do obecnego — to <strong>rodzina</strong>
+    (<code>familyId</code>). Pałeczka (uwierzytelniona sesja użytkownika)
+    jest ta sama przez cały bieg; zmienia się tylko to, kto ją aktualnie
+    niesie. <code>R1 → R2 → R3 → R4</code> to cała ta sama rodzina — jeden
+    wiersz na rotację, wszystkie z tym samym <code>familyId</code>;
+    <code>replacedByTokenId</code> pozwala przejść po łańcuchu do celów
+    debugowania/audytu.</p>
+    <p>Dlaczego unieważnia się całą <em>drużynę</em>, a nie tylko oznaczonego
+    biegacza: jeśli napastnik ukradł pałeczkę R3 <strong>po tym</strong>, jak
+    już została przekazana do R4, a ty unieważniłbyś tylko R3, to
+    R4/R5/R6... (wydane <em>po</em> kradzieży) też mogą być już
+    skompromitowane — napastnik mógł użyć skradzionego tokenu, by wyrobić
+    sobie nowy, zanim cokolwiek zauważyłeś. Jedyną bezpieczną reakcją jest
+    zakończenie całej linii i wymuszenie zupełnie nowego logowania.</p>
+
+    <h3>Prawdziwy niuans: niewinne race'y a prawdziwe ataki</h3>
+    <p>"Każde ponowne użycie unieważnionego tokenu = kompromitacja" ma jeden
+    przypadek fałszywie pozytywny: <strong>wiele kart tej samej aplikacji</strong>
+    dzieli to samo ciasteczko refresh tokenu, ale ma osobną pamięć JS. Jeśli
+    karta A wykona refresh (R1 → R2) ułamek sekundy przed tym, zanim karta B
+    spróbuje użyć R1, serwer widzi "reuse" — nieodróżnialne od ataku — i
+    wylogowałby użytkownika ze wszystkich kart bez realnego powodu.</p>
+    <blockquote>Standardową mitygacją (Auth0, OAuth 2.0 rotation BCP) jest
+    krótkie <strong>okno tolerancji na reuse</strong>: jeśli już obrócony
+    token pojawi się ponownie w ciągu kilku sekund od rotacji, traktuj to
+    jako niewinny race, nie atak. <strong>Zakres tej lekcji:</strong> okno
+    tolerancji <em>jest</em> zaimplementowane w tym podstawowym podejściu —
+    to tanie (jedno porównanie znaczników czasu) i mocno zmniejsza liczbę
+    fałszywych alarmów.</blockquote>
+
+    <h3>Deduplikacja (klient) vs. okno tolerancji (serwer)</h3>
+    <table>
+      <thead><tr><th></th><th>Deduplikacja (single-flight)</th><th>Okno tolerancji</th></tr></thead>
+      <tbody>
+        <tr><td>Żyje w</td><td>Frontend (JS)</td><td>Backend (<code>rotateRefreshToken</code>)</td></tr>
+        <tr><td>Zapobiega</td><td>N zbędnym żądaniom refresh z jednej karty</td><td>Fałszywym alarmom reuse między kartami</td></tr>
+        <tr><td>Zasięg</td><td>Jedna karta/JS runtime</td><td>Dowolna karta — logika serwera</td></tr>
+        <tr><td>Zadanie tego repo?</td><td><span class="pill bad">Nie</span> — brak frontendu tutaj</td><td><span class="pill good">Tak</span> — zaimplementowane</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Są komplementarne: deduplikacja zmniejsza częstość
+    race'a, okno tolerancji sprawia, że serwer jest wyrozumiały, gdy mimo
+    wszystko się zdarzy.</p>
+
+    <h3>Dlaczego rotować przy każdym wywołaniu, nie tylko blisko wygaśnięcia</h3>
+    <p>Wykrywanie reuse działa tylko <em>dlatego</em>, że każdy token jest
+    jednorazowy. Gdyby ten sam token pozostawał ważny przez cały TTL (np. 30
+    dni), skradziony token byłby nieodróżnialny od prawowitego przez cały ten
+    czas. Rotacja zmienia pytanie z "czy to w ramach TTL?" na "czy ta wartość
+    była już użyta?" — wykrywając kompromitację w sekundy, nie miesiące.
+    Wygaśnięcie i rotacja to <strong>osobne mechanizmy</strong>: wygaśnięcie
+    ogranicza zewnętrzny czas życia rodziny; rotacja zachodzi przy każdej
+    pojedynczej wymianie.</p>
+
+    <h3>Wygaśnięcie stałe vs. przesuwne</h3>
+    <table>
+      <thead><tr><th>Podejście</th><th>Zachowanie</th><th>Kompromis</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Stałe</strong></td><td>Twardy limit niezależnie od aktywności</td><td>Proste, dobre dla polityk "re-auth co N dni"</td></tr>
+        <tr><td><strong>Przesuwne</strong></td><td>Sesja odnawia się, dopóki aktywna</td><td>Lepszy UX, ale wymaga osobnego bezwzględnego limitu</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Pola modelu danych</h3>
+    <table>
+      <thead><tr><th>Pole</th><th>Rola</th></tr></thead>
+      <tbody>
+        <tr><td><code>tokenHash</code></td><td>sha256 surowego tokenu (unikalny, indeksowany — główny klucz wyszukiwania)</td></tr>
+        <tr><td><code>userId</code></td><td>do kogo należy ta sesja</td></tr>
+        <tr><td><code>familyId</code></td><td>grupuje tokeny z jednego logowania; unieważnienie rodziny = unieważnienie wszystkiego</td></tr>
+        <tr><td><code>expiresAt</code></td><td>bezwzględny TTL, niezależny od rotacji</td></tr>
+        <tr><td><code>revokedAt</code></td><td>null dopóki aktywny; ustawiane po rotacji lub reuse</td></tr>
+        <tr><td><code>replacedByTokenId</code></td><td>opcjonalnie — ślad łańcucha rotacji do audytu</td></tr>
+      </tbody>
+    </table>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-3a">
+    <h2><span class="num">3a</span>Kiedy wywoływać /auth/refresh?</h2>
+    <p><strong>Nie</strong> jest wywoływany przed każdym użyciem access
+    tokenu — access token jest dołączany bezpośrednio do każdego wywołania
+    API (<code>Authorization: Bearer ...</code>) i weryfikowany wyłącznie
+    podpisem, bez zapytania do bazy. Podczas 15 minut normalnego użycia,
+    <code>/auth/refresh</code> jest wywoływany <strong>zero</strong> razy.</p>
+    <table>
+      <thead><tr><th>Moment</th><th>Dlaczego</th></tr></thead>
+      <tbody>
+        <tr><td>Start aplikacji / odświeżenie strony</td><td>Access token w pamięci zniknął; ciasteczko refresh przetrwało</td></tr>
+        <tr><td>Proaktywnie, przed <code>exp</code></td><td>Odśwież wcześniej (np. ~12. minuta), żeby uniknąć widocznego błędu</td></tr>
+        <tr><td>Reaktywnie, przy 401</td><td>Zabezpieczenie: wywołanie → 401 → refresh → ponów żądanie</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Race condition dotyczy tylko wąskiego okna przypadku
+    reaktywnego, gdy kilka żądań dostaje 401 naraz.</p>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-4">
+    <h2><span class="num">4</span>Gdzie na froncie trzymać access token?</h2>
+    <table>
+      <thead><tr><th>Miejsce</th><th>Ryzyko XSS</th><th>Ryzyko CSRF</th><th>Przeżywa odświeżenie?</th></tr></thead>
+      <tbody>
+        <tr><td>Zmienna JS w pamięci</td><td><span class="pill good">Niskie</span></td><td><span class="pill good">Brak</span></td><td>Nie</td></tr>
+        <tr><td><code>localStorage</code> / <code>sessionStorage</code></td><td><span class="pill bad">Wysokie</span></td><td><span class="pill good">Brak</span></td><td>Tak</td></tr>
+        <tr><td>Ciasteczko <code>httpOnly</code></td><td><span class="pill good">Niskie</span></td><td><span class="pill bad">Tak</span></td><td>Tak</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Rekomendacja w tym projekcie:</strong> access token trzymany
+    tylko w pamięci (nigdy nie persystowany); przy pełnym odświeżeniu strony
+    aplikacja po cichu wywołuje <code>/auth/refresh</code>. Refresh token:
+    ciasteczko <code>httpOnly</code>, <code>Secure</code>,
+    <code>SameSite=Lax</code> — niewidoczne dla JS.</p>
+    <blockquote>Ochrona CSRF typu double-submit dla endpointów
+    refresh/logout jest celowo oznaczona jako kolejny krok na przyszłość, nie
+    zaimplementowana w tym podstawowym podejściu.</blockquote>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-5">
+    <h2><span class="num">5</span>onRequest vs preHandler w Fastify</h2>
+    <pre><code>onRequest → preParsing → preValidation → (walidacja body/query) → preHandler → handler</code></pre>
+    <table>
+      <thead><tr><th>Hook</th><th>Przed czym się wykonuje</th><th>Typowe zastosowanie</th></tr></thead>
+      <tbody>
+        <tr><td><code>onRequest</code></td><td>Parsowaniem body, walidacją</td><td>Obecność nagłówka auth, rate limiting, CORS, logowanie</td></tr>
+        <tr><td><code>preHandler</code></td><td>Handlerem, ale po walidacji schematu</td><td>Sprawdzenia autoryzacji korzystające z <code>request.body</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Dlaczego <code>authGuard</code> jest <code>preHandler</code>, a
+    nie <code>onRequest</code>:</strong> nie potrzebuje body, ale
+    <code>preHandler</code> to konwencjonalne miejsce na "czy to żądanie ma
+    prawo dotrzeć do handlera", zostawiając <code>onRequest</code> wolny na
+    sprawy przekrojowe jak rate limiting.</p>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-6">
+    <h2><span class="num">6</span>Pełny obraz — diagram cyklu życia tokenów</h2>
+    <p>Łącząc poprzednie sekcje w jedną oś czasu, obejmującą całą sesję
+    logowania:</p>
+    <div class="mermaid">
+sequenceDiagram
+    participant FE as Frontend (pamięć)
+    participant API
+    participant DB as Tabela RefreshToken
+
+    FE->>API: POST /auth/login (email+hasło)
+    API->>DB: utwórz wiersz RefreshToken (rodzina F1)
+    API-->>FE: access_token (JWT, 15m) + Set-Cookie refresh_token=R1 (httpOnly)
+    Note over FE: access_token trzymany tylko w pamięci
+
+    loop normalne użycie API (&lt; 15 min)
+        FE->>API: GET /resource (Authorization: Bearer access_token)
+        API-->>FE: 200 OK (sprawdzony podpis + exp, bez zapytania do bazy)
+    end
+
+    alt proaktywny refresh (~12. minuta)
+        FE->>API: POST /auth/refresh (cookie R1)
+        API->>DB: R1 ważny i nieodwołany -&gt; unieważnij R1, utwórz R2 (rodzina F1)
+        API-->>FE: nowy access_token + Set-Cookie refresh_token=R2
+    else reaktywny refresh (access token już wygasł)
+        FE->>API: GET /resource (wygasły access_token)
+        API-->>FE: 401 Unauthorized
+        FE->>API: POST /auth/refresh (cookie R1)
+        API->>DB: rotacja R1 -&gt; R2
+        API-->>FE: nowy access_token + Set-Cookie refresh_token=R2
+        FE->>API: ponów GET /resource (nowy access_token)
+        API-->>FE: 200 OK
+    end
+
+    Note over FE,DB: ...mija czas, kolejne rotacje: R2 -&gt; R3 -&gt; R4...
+
+    alt użytkownik się wylogowuje
+        FE->>API: POST /auth/logout (cookie Rn)
+        API->>DB: unieważnij Rn (opcjonalnie całą rodzinę F1)
+        API-->>FE: 204, Set-Cookie refresh_token=(wyczyszczone)
+        Note over FE: usuń też access_token z pamięci
+    else refresh token w końcu wygasa (długa nieaktywność)
+        FE->>API: POST /auth/refresh (cookie Rn, minął expiresAt)
+        API-->>FE: 401 -&gt; przekierowanie do logowania
+    else wykryto reuse (skradziony/powtórzony stary token)
+        FE->>API: POST /auth/refresh (cookie z już unieważnionym tokenem)
+        API->>DB: znaleziony, ale revokedAt != null -&gt; unieważnij całą rodzinę F1
+        API-->>FE: 401 -&gt; wymuś pełne ponowne logowanie
+    end
+    </div>
+    <blockquote>
+      <strong>Na co zwrócić uwagę:</strong> access token nigdy nie dotyka
+      bazy danych (czyste sprawdzenie podpisu); refresh token jest jedyną
+      rzeczą trafiającą do <code>/auth/refresh</code> i każde udane użycie
+      zastępuje samo siebie w tej samej <code>familyId</code>; historia
+      refresh tokenu kończy się zawsze jednym z trzech sposobów: wylogowanie,
+      naturalny <code>expiresAt</code>, albo unieważnienie całej rodziny po
+      wykryciu reuse.
+    </blockquote>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <section id="sec-7">
+    <h2><span class="num">7</span>Szybkie podsumowanie</h2>
+    <ul>
+      <li><strong>Sesja</strong> nadal istnieje — żyje na poziomie refresh tokenu, nie access tokenu.</li>
+      <li><strong>JWT</strong> = samowystarczalny, czytelny, bez zapytania do bazy. <strong>Opaque</strong> = bez znaczenia sam w sobie, zawsze zapytanie do bazy, trywialnie unieważnialny.</li>
+      <li>Access token → JWT. Refresh token → opaque, haszowany przy zapisie.</li>
+      <li>Rotacja = jednorazowe tokeny, przy <strong>każdej</strong> wymianie (nie tylko blisko wygaśnięcia). Reuse detection = unieważniony token użyty ponownie → unieważnij całą rodzinę (z oknem tolerancji na race'y między kartami, zaimplementowanym po stronie serwera).</li>
+      <li><code>/auth/refresh</code> wywoływany tylko w konkretnych momentach (start, proaktywnie, reaktywnie) — nigdy przed każdym wywołaniem API.</li>
+      <li>Wygaśnięcie stałe vs. przesuwne to świadomy wybór produktowo-bezpieczeństwowy.</li>
+      <li>Access token: pamięć. Refresh token: ciasteczko <code>httpOnly</code>.</li>
+      <li><code>onRequest</code> = najwcześniej, bez body. <code>preHandler</code> = po walidacji.</li>
+    </ul>
+    <a class="back-to-toc" href="#">↑ do spisu treści</a>
+  </section>
+
+  <footer>auth_service — materiał edukacyjny &middot; zobacz też <code>docs/jwt-manual.md</code> i <code>docs/refresh-token-manual.pl.md</code></footer>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const btn = document.getElementById("theme-toggle");
+  function applyTheme(theme) {
+    root.setAttribute("data-theme", theme);
+    btn.textContent = theme === "dark" ? "☀️ Jasny motyw" : "🌙 Ciemny motyw";
+  }
+  const stored = localStorage.getItem("rtm-theme");
+  applyTheme(stored || "light");
+  btn.addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    localStorage.setItem("rtm-theme", next);
+    applyTheme(next);
+  });
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: (stored || "light") === "dark" ? "dark" : "default",
+    securityLevel: "loose",
+  });
+</script>
+</body>
+</html>
+

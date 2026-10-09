@@ -19,5 +19,24 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  refreshTokens RefreshToken[]
+
   @@map("users")
+}
+
+model RefreshToken {
+  id                String        @id @default(uuid(7))
+  tokenHash         String        @unique
+  userId            String
+  familyId          String
+  replacedByTokenId String?       @unique
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime      @default(now())
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  replacedByToken   RefreshToken? @relation("TokenRotation", fields: [replacedByTokenId], references: [id])
+  replacedToken     RefreshToken? @relation("TokenRotation")
+
+  @@index([familyId])
+  @@map("refresh_tokens")
 }
