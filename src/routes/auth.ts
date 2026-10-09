@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
-import { UnauthorizedError } from "../errors/domain/UnauthorizedError.js";
-import { authGuard } from "../lib/authGuard.js";
+import { NotFoundError } from "../errors/domain/NotFoundError.js";
+import { authGuard, requireUser } from "../lib/authGuard.js";
 import { signAccessToken } from "../lib/jwt.js";
 import {
   type LoginBody,
@@ -16,7 +16,7 @@ import { authenticateUser } from "../services/auth.service.js";
 export default async function authRoutes(app: FastifyInstance) {
   app.post<{
     Body: LoginBody;
-    Reply: { 200: LoginReply200; 401: ErrorReply };
+    Reply: { 200: LoginReply200; 400: ErrorReply; 401: ErrorReply };
   }>(
     "/auth/login",
     {
@@ -24,6 +24,7 @@ export default async function authRoutes(app: FastifyInstance) {
         body: loginBodySchema,
         response: {
           200: loginReply200Schema,
+          400: errorReplySchema,
           401: errorReplySchema,
         },
       },
@@ -51,11 +52,11 @@ export default async function authRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const user = await request.server.db.user.findUnique({
-        where: { id: request.user.id },
+        where: { id: requireUser(request).id },
       });
 
       if (!user) {
-        throw new UnauthorizedError("User not found");
+        throw new NotFoundError("User not found");
       }
 
       return reply.status(200).send({
